@@ -1,6 +1,6 @@
 .idea/
 node_modules/
-dist/
+dist/*
 npm-debug.log
 
 # We need these in the repo for github pages.
