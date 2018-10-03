@@ -1,0 +1,25 @@
+{
+  "name": "sets-game-browser",
+  "version": "0.0.1",
+  "scripts": {
+    "clean": "if exist dist rmdir /s /q dist && mkdir dist",
+    "build": "npm run clean && npm run build:work",
+    "web": "npm run build && npm run web:work",
+    "build:work": "tsc -d",
+    "web:work": "browserify dist/index.js -o dist/bundle.js"
+  },
+  "dependencies": {
+    "ipfs-pubsub-room": "^1.4.0",
+    "sets-game-engine": "../Engine",
+    "util": "^0.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.11.3",
+    "browserify": "^16.2.3",
+    "ipfs": "^0.32.3",
+    "mocha": "^5.2.0",
+    "should": "^13.2.3",
+    "strict-event-emitter-types": "^2.0.0",
+    "typescript": "^3.1.1"
+  }
+}
