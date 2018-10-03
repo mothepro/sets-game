@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "ipfs-pubsub-room": "^1.4.0",
-    "sets-game-engine": "git://github.com/mothepro/sets-game-engine.git",
-    "util": "^0.11.0"
+    "sets-game-engine": "git://github.com/mothepro/sets-game-engine.git"
   },
   "devDependencies": {
     "@types/node": "^10.11.3",

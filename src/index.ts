@@ -1,6 +1,6 @@
 declare const Ipfs: any
 import * as Room from 'ipfs-pubsub-room'
-import {promisify} from 'typed-promisify'
+import {promisify} from './util'
 // import 'sets-game-engine'
 
 log('Loaded')
