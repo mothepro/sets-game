@@ -2,3 +2,6 @@
 node_modules/
 dist/
 npm-debug.log
+
+# We need these in the repo for github pages.
+!dist/bundle.js
