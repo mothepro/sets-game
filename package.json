@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "scripts": {
     "compile": "tsc",
-    "build:dev": "simplifyify src/index.tsx -o dist/bundle.js --debug --bundle",
-    "build:prod": "simplifyify src/index.tsx -o dist/bundle.js --minify",
-    "build": "simplifyify src/index.tsx -o dist/bundle.js --debug --bundle --minify"
+    "build:dev": "simplifyify src/index.tsx -o dist/umd/bundle.js --debug --bundle",
+    "build:prod": "simplifyify src/index.tsx -o dist/umd/bundle.min.js --minify",
+    "build": "simplifyify src/index.tsx -o dist/umd/bundle.js --debug --bundle --minify"
   },
   "dependencies": {
     "@material-ui/core": "^3.4.0",

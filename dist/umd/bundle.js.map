@@ -1,0 +1,15 @@
+{
+  "version": 3,
+  "sources": [
+    "../../node_modules/browser-pack/_prelude.js",
+    "../../src/index.tsx"
+  ],
+  "names": [],
+  "mappings": "AAAA;;;;ACAA,6BAA8B;AAC9B,oCAAqC;AACrC,0CAA0C;AAE1C,IAAM,GAAG,GAAG;IACR,OAAA,oBAAC,aAAM,IAAC,OAAO,EAAC,WAAW,EAAC,KAAK,EAAC,SAAS,kBAElC;AAFT,CAES,CAAA;AAEb,QAAQ,CAAC,MAAM,CAAC,oBAAC,GAAG,OAAG,EAAE,QAAQ,CAAC,cAAc,CAAC,KAAK,CAAC,CAAC,CAAA",
+  "file": "generated.js",
+  "sourceRoot": "",
+  "sourcesContent": [
+    "(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c=\"function\"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error(\"Cannot find module '\"+i+\"'\");throw a.code=\"MODULE_NOT_FOUND\",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u=\"function\"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()",
+    "import * as React from 'react'\nimport * as ReactDOM from 'react-dom'\nimport { Button } from '@material-ui/core'\n\nconst App = () =>\n    <Button variant=\"contained\" color=\"primary\">\n      Hello World\n    </Button>\n\nReactDOM.render(<App />, document.getElementById('app'))\n"
+  ]
+}
