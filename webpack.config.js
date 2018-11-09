@@ -1,8 +1,7 @@
 const path = require('path')
-const webpack = require('webpack')
+const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-
-const isProduction = process.argv.includes('-p')
+const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 
 const scripts = isProduction
     ? [ // Production CDN links
@@ -36,15 +35,12 @@ const plugins = [
 ]
 
 if (!isProduction)
-    plugins.push(new webpack.HotModuleReplacementPlugin())
+    plugins.push(new HotModuleReplacementPlugin())
 
 module.exports = {
     mode: 'development',
     entry: {
-        app: [
-            './src/index.tsx',
-            'webpack-hot-middleware/client',
-        ],
+        app: [ './src/index.tsx' ],
     },
     externals: {
         'react': 'React',
@@ -54,10 +50,10 @@ module.exports = {
         // '@material-ui/icons': 'material-icons',
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'js/[name].bundle.js'
+        path: path.resolve(__dirname, 'bin'),
+        filename: '[name].js'
     },
-    devtool: 'source-map',
+    devtool: isProduction ? false : 'eval-source-map',
     resolve: {
         extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
     },

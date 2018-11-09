@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "build:dev": "webpack",
-    "build:prod": "webpack -p",
-    "predeploy": "npm run build:prod",
-    "deploy": "gh-pages -d dist"
+    "dev": "webpack",
+    "prod": "webpack -p",
+    "predeploy": "npm run prod",
+    "deploy": "gh-pages -d bin"
   },
   "dependencies": {
     "@material-ui/core": "^3.4.0",
@@ -30,7 +30,6 @@
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-middleware": "^3.4.0",
-    "webpack-dev-server": "^3.1.10",
-    "webpack-hot-middleware": "^2.24.3"
+    "webpack-dev-server": "^3.1.10"
   }
 }
