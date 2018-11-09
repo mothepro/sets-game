@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline } from '@material-ui/core'
+import { MuiThemeProvider, createMuiTheme, IconButton, CssBaseline } from '@material-ui/core'
 import { Player } from 'sets-game-engine'
 import Menu from './Menu'
 import GameUI from './Game'
+import Icon from './Icon'
 
 interface Props {
   package: string
@@ -48,7 +49,7 @@ export default class App extends React.Component<Props, State> {
               right:    App.lightTheme.spacing.unit,
               top:      App.lightTheme.spacing.unit,
           }}>
-              <Icon fontSize="small">wb_incandescent</Icon>
+              <Icon fontSize="small" name="WbIncandescentTwoTone" />
           </IconButton>
 
           { this.state.players
