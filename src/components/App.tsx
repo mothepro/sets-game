@@ -49,7 +49,7 @@ export default class App extends React.Component<Props, State> {
               right:    App.lightTheme.spacing.unit,
               top:      App.lightTheme.spacing.unit,
           }}>
-              <Icon fontSize="small" name="WbIncandescentTwoTone" />
+              <Icon fontSize="small" name="LightBulb" />
           </IconButton>
 
           { this.state.players
