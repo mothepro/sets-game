@@ -3,6 +3,3 @@ node_modules
 dist/*
 npm-debug.log
 package-lock.json
-
-# We need these in the repo for github pages.
-!dist/umd/
