@@ -11,7 +11,7 @@ interface Props {
 
 interface State {
   light: boolean
-  players?: Player[]
+  players: Player[]
 }
 
 export default class App extends React.Component<Props, State> {
@@ -25,12 +25,9 @@ export default class App extends React.Component<Props, State> {
       typography: { useNextVariants: true },
     })
 
-  constructor(props: Props) {
-    super(props)
-
-    this.state = {
-      light: true,
-    }
+  public state = {
+    light: true,
+    players: [],
   }
 
   /** Switches Material UI Theme and body's background color */
@@ -52,7 +49,7 @@ export default class App extends React.Component<Props, State> {
               <Icon fontSize="small" name="LightBulb" />
           </IconButton>
 
-          { this.state.players
+          { this.state.players.length
               ? <GameUI players={this.state.players} />
               : <Menu package={this.props.package} onReady={players => this.setState({players})} /> }
       </MuiThemeProvider>
