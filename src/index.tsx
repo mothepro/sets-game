@@ -7,3 +7,14 @@ render(
     <App package={`${name}@${version}`} />,
     document.getElementById('app')
 )
+
+interface HotNodeModule extends NodeModule {
+    hot?: {
+        accept: () => void
+    }
+}
+
+declare let module: HotNodeModule
+
+if (module.hot)
+    module.hot.accept()
