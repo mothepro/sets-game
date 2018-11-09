@@ -2,7 +2,9 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const scripts = process.argv.includes('-p')
+const isProduction = process.argv.includes('-p')
+
+const scripts = isProduction
     ? [ // Production CDN links
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
@@ -14,6 +16,27 @@ const scripts = process.argv.includes('-p')
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.development.js',
         'https://unpkg.com/p2p-lobby@0.0.14/dist/bundle.js',
     ]
+
+const plugins = [
+    new HtmlWebpackPlugin({
+        // Required for 'html-webpack-template'
+        inject: false,
+        template: require('html-webpack-template'),
+
+        title: 'Sets the Game',
+        mobile: true,
+        appMountId: 'app',
+        lang: 'en',
+        scripts,
+        links: [
+            "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
+            "https://fonts.googleapis.com/icon?family=Material+Icons",
+        ],
+    }),
+]
+
+if (!isProduction)
+    plugins.push(new webpack.HotModuleReplacementPlugin())
 
 module.exports = {
     mode: 'development',
@@ -51,22 +74,5 @@ module.exports = {
             },
         ],
     },
-    plugins: [
-        new HtmlWebpackPlugin({
-            // Required for 'html-webpack-template'
-            inject: false,
-            template: require('html-webpack-template'),
-
-            title: 'Sets the Game',
-            mobile: true,
-            appMountId: 'app',
-            lang: 'en',
-            scripts,
-            links: [
-                "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
-                "https://fonts.googleapis.com/icon?family=Material+Icons",
-            ],
-        }),
-        new webpack.HotModuleReplacementPlugin()
-    ]
+    plugins,
 }

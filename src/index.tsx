@@ -16,5 +16,5 @@ interface HotNodeModule extends NodeModule {
 
 declare let module: HotNodeModule
 
-if (module.hot)
+if (module.hot && process.env.NODE_ENV == 'development')
     module.hot.accept()
