@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "scripts": {
     "compile": "tsc",
-    "build:dev": "simplifyify src/index.tsx -o dist/umd/bundle.js --debug --bundle",
-    "build:prod": "simplifyify src/index.tsx -o dist/umd/bundle.min.js --minify",
-    "build": "simplifyify src/index.tsx -o dist/umd/bundle.js --debug --bundle --minify"
+    "start": "webpack-dev-server --mode development",
+    "build:dev": "webpack",
+    "build:prod": "webpack -p"
   },
   "dependencies": {
     "@material-ui/core": "^3.4.0",
@@ -15,27 +15,20 @@
     "sets-game-engine": "git://github.com/mothepro/sets-game-engine.git"
   },
   "devDependencies": {
+    "@material-ui/icons": "^3.0.1",
     "@types/node": "^10.11.3",
-    "@types/react": "^16.4.18",
+    "@types/react": "^16.7.0",
     "@types/react-dom": "^16.0.9",
-    "browserify": "^16.2.3",
-    "browserify-shim": "^3.8.14",
-    "ipfs": "^0.32.3",
-    "mocha": "^5.2.0",
-    "should": "^13.2.3",
-    "simplifyify": "^7.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-template": "^6.2.0",
+    "source-map-loader": "^0.2.4",
     "strict-event-emitter-types": "^2.0.0",
-    "typescript": "^3.1.1"
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
-  },
-  "browserify-shim": {
-    "p2p-lobby": "global:p2p",
-    "react": "global:React",
-    "react-dom": "global:ReactDOM",
-    "@material-ui/core": "global:material-ui"
+    "ts-loader": "^5.3.0",
+    "typescript": "^3.1.1",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-dev-server": "^3.1.10",
+    "webpack-hot-middleware": "^2.24.3"
   }
 }
