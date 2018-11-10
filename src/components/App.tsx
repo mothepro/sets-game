@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline, Dialog, DialogTitle, DialogContent, DialogContentText } from '@material-ui/core'
+import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline, Dialog, DialogTitle, DialogContent, DialogContentText, Grid, Typography } from '@material-ui/core'
 import { Player } from 'sets-game-engine'
 import Menu from './Menu'
 import GameUI from './Game'
@@ -65,9 +65,16 @@ export default class App extends React.Component<Props, State> {
                 </DialogContent>
               </Dialog>
           }
-          { this.state.players.length
-              ? <GameUI players={this.state.players} />
-              : <Menu package={this.props.package} onReady={players => this.setState({players})} /> }
+          <Grid container justify="center" style={{padding: '2em'}}>
+            <Grid container item justify="center" style={{marginBottom: '1em'}}>
+              <Typography variant="h2" gutterBottom>
+                  Sets
+              </Typography>
+            </Grid>
+            { this.state.players.length
+                ? <GameUI players={this.state.players} rng={(max: number) => Math.floor(Math.random() * max)} />
+                : <Menu package={this.props.package} onReady={players => this.setState({players})} /> }
+          </Grid>
       </MuiThemeProvider>
     </>
 }
