@@ -5,19 +5,17 @@ import { Card, Details } from 'sets-game-engine'
 interface Props {
     card: Card
     classes: any
-    onSelect?: Function
-    onUnselect?: Function
-}
-
-interface State {
     selected: boolean
+    toggle?: () => void
 }
 
-// TODO merge similar styles
+// TODO merge similar styles: https://github.com/cssinjs/jss-nested
 const styles = (theme: any) => ({
     card: {
-        height: '100%',
-        width: '100%',
+        height: '10em',
+        width: '20em',
+        textAlign: 'center',
+        padding: '1.5em 0'
     },
     square: {
         margin: '.5em',
@@ -88,14 +86,14 @@ const Triangle = ({size = 1, color = 'black', opacity = 1, classes = {} as any})
 const Circle = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
     <div style={{borderColor: color}} className={classes.circle}>
         <div style={{
-            width: `${size}em`,
+            width:  `${size}em`,
             height: `${size}em`,
             backgroundColor: color,
             opacity,
         }} />
     </div>
 
-class CardUI extends React.PureComponent<Props, State> {
+class CardUI extends React.PureComponent<Props> {
 
     private static readonly SHAPES = {
         [Details.Shape.TRIANGLE]: Triangle,
@@ -109,27 +107,10 @@ class CardUI extends React.PureComponent<Props, State> {
         [Details.Color.RED]:   colors.red[500],
     }
 
-    public state = {
-        selected: false,
-    }
-
-    toggle = () => {
-        if (this.state.selected && this.props.onUnselect)
-            this.props.onUnselect()
-
-        if (!this.state.selected && this.props.onSelect)
-            this.props.onSelect()
-
-        this.setState({selected: !this.state.selected})
-    }
-
     render = () =>
-        <Grid item sm={4} xs={12}>
-            <MaterialCard onClick={this.toggle} raised={this.state.selected} className={this.props.classes.card}>
-                <CardContent style={{
-                    textAlign: 'center',
-                    minHeight: '3em',
-                }}>
+        <Grid item container md={4} sm={6} xs={12} justify="center">
+            <MaterialCard onClick={this.props.toggle} raised={this.props.selected} className={this.props.classes.card}>
+                <CardContent style={{height: '100%'}}>
                     {[...Array(1 + this.props.card.quantity)].map((_, i) => {
                         const Shape = CardUI.SHAPES[this.props.card.shape]
                         return <Shape
@@ -138,8 +119,7 @@ class CardUI extends React.PureComponent<Props, State> {
                             color={CardUI.COLORS[this.props.card.color]}
                             opacity={this.props.card.opacity / 2}
                             classes={this.props.classes as any}
-                        />
-                    })}
+                        /> })}
                 </CardContent>
             </MaterialCard>
         </Grid>
