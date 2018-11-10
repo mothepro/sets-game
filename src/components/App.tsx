@@ -36,10 +36,12 @@ export default class App extends React.Component<Props, State> {
   }
 
   /** Switches Material UI Theme and body's background color */
-  toggleTheme = () => {
+  private toggleTheme = () => {
     document.body.style.backgroundColor = (!this.state.light ? App.lightTheme : App.darkTheme).palette.background.default
     this.setState({light: !this.state.light})
   }
+
+  private onError = (error: Error) => this.setState({error})
 
   render = () =>
     <>
@@ -75,6 +77,7 @@ export default class App extends React.Component<Props, State> {
                     rng={(max: number) => Math.floor(Math.random() * max)} />
                 : <Menu
                     package={this.props.package}
+                    onError={this.onError}
                     onReady={players => this.setState({players})} /> }
           </Grid>
       </MuiThemeProvider>

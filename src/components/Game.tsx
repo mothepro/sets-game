@@ -32,13 +32,13 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({cards: this.game.playableCards})
     }
 
-    takeSet = () => {
+    private takeSet = () => {
         const { selected } = this.state
         this.props.players[0].takeSet(...selected as [number, number, number])
         this.setState({selected: []})
     }
 
-    toggleCard = (index: number) => {
+    private toggleCard = (index: number) => {
         const { selected } = this.state
         if(selected.includes(index))
             selected.splice(selected.indexOf(index), 1)
