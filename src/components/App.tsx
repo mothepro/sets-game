@@ -66,9 +66,9 @@ export default class App extends React.Component<Props, State> {
               </Dialog>
           }
 
-          <Typography variant="h2" align="center" style={{margin: '1em 0'}}>Sets</Typography>
+          <Typography variant="h2" align="center" style={{marginTop: '1em'}}>Sets</Typography>
 
-          <Grid container style={{padding: '0 2em'}} justify="center" spacing={24}>
+          <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
             { this.state.players.length
                 ? <GameUI
                     players={this.state.players}
