@@ -82,8 +82,17 @@ const SvgData = {
 
 
 export default function Icon(props: {
-        name: keyof typeof SvgData
-        [others: string]: any
+        name: keyof typeof SvgData,
+        size?: number,
+        [others: string]: any,
     }) {
-    return <SvgIcon {...props as {}}>{SvgData[props.name]}</SvgIcon>
+    return <SvgIcon
+        {...props as {}}
+        style={{
+            width: `${props.size}em`,
+            height: `${props.size}em`,
+        }}
+    >
+        {SvgData[props.name]}
+    </SvgIcon>
 }
