@@ -65,15 +65,17 @@ export default class App extends React.Component<Props, State> {
                 </DialogContent>
               </Dialog>
           }
-          <Grid container justify="center" style={{padding: '2em'}}>
-            <Grid container item justify="center" style={{marginBottom: '1em'}}>
-              <Typography variant="h2" gutterBottom>
-                  Sets
-              </Typography>
-            </Grid>
+
+          <Typography variant="h2" align="center" style={{margin: '1em 0'}}>Sets</Typography>
+
+          <Grid container style={{padding: '0 2em'}} justify="center" spacing={24}>
             { this.state.players.length
-                ? <GameUI players={this.state.players} rng={(max: number) => Math.floor(Math.random() * max)} />
-                : <Menu package={this.props.package} onReady={players => this.setState({players})} /> }
+                ? <GameUI
+                    players={this.state.players}
+                    rng={(max: number) => Math.floor(Math.random() * max)} />
+                : <Menu
+                    package={this.props.package}
+                    onReady={players => this.setState({players})} /> }
           </Grid>
       </MuiThemeProvider>
     </>
