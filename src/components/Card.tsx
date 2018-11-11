@@ -15,7 +15,10 @@ const styles = (theme: any) => ({
         height: '10em',
         width: '20em',
         textAlign: 'center',
-        padding: '1.5em 0'
+        padding: '1.5em 0',
+        '&:hover': {
+            cursor: 'pointer',
+        }
     },
     square: {
         margin: '.5em',
