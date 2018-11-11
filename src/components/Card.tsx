@@ -59,7 +59,10 @@ const styles = (theme: any) => ({
 })
 
 const Square = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
-    <div style={{borderColor: color, borderWidth: `${size / 6}em`}} className={classes.square}>
+    <div className={classes.square} style={{
+        borderColor: color,
+        borderWidth: Math.floor((size / 6) * 16), // round to nearest pixel
+    }}>
         <div style={{
             width: `${size}em`,
             height: `${size}em`,
@@ -91,7 +94,10 @@ const Triangle = ({size = 1, color = 'black', opacity = 1, classes = {} as any})
 }
 
 const Circle = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
-    <div style={{borderColor: color, borderWidth: `${size / 6}em`}} className={classes.circle}>
+    <div className={classes.circle} style={{
+        borderColor: color,
+        borderWidth: Math.floor((size / 6) * 16), // round to nearest pixel
+    }}>
         <div style={{
             width:  `${size}em`,
             height: `${size}em`,
@@ -120,9 +126,7 @@ class CardUI extends React.PureComponent<Props> {
                 onClick={this.props.toggle}
                 raised={this.props.selected}
                 className={this.props.classes.card}
-                style={{
-                    padding: `${isWidthDown('xs', this.props.width) ? 1 : 1.5}em 0`,
-                }}
+                style={{padding: '1em 0'}}
             >
                 <CardContent style={{height: '100%', padding: isWidthDown('xs', this.props.width) ? 0 : undefined}}>
                     {[...Array(1 + this.props.card.quantity)].map((_, i) => {
