@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^3.4.0",
-    "p2p-lobby": "0.0.14",
+    "p2p-lobby": "0.0.15",
     "react": "^16.6.1",
     "react-dom": "^16.6.1",
     "sets-game-engine": "git://github.com/mothepro/sets-game-engine.git"

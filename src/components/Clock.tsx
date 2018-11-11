@@ -24,7 +24,7 @@ export default class extends React.PureComponent<{}, State> {
     componentWillUnmount = () => clearInterval(this.state.handle!)
 
     componentWillMount = () => this.setState({
-        handle: setInterval(() => this.setState({current: new Date}), 1000) as unknown as number // node vs browser
+        handle: setInterval(() => this.setState({current: new Date}), 1000 / 2) as unknown as number // node vs browser
     })
 
     render = () => <>
