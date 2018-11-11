@@ -1,21 +1,23 @@
 import * as React from 'react'
-import { Card as MaterialCard, CardContent, Grid, colors, withStyles, Typography } from '@material-ui/core'
+import { Card as MaterialCard, CardContent, Grid, colors, withStyles, withWidth } from '@material-ui/core'
 import { Card, Details } from 'sets-game-engine'
+import { isWidthUp, isWidthDown } from '@material-ui/core/withWidth';
 
 interface Props {
     card: Card
     classes: any
     selected: boolean
     toggle?: () => void
+
+    width: 'xl' | 'lg' | 'md' | 'sm' | 'xs'
 }
 
 // TODO merge similar styles: https://github.com/cssinjs/jss-nested
 const styles = (theme: any) => ({
     card: {
-        height: '10em',
-        width: '20em',
-        textAlign: 'center',
-        padding: '1.5em 0',
+        // height: '10em',
+        maxWidth: '20em',
+        width: '100%',
         '&:hover': {
             cursor: 'pointer',
         }
@@ -24,7 +26,6 @@ const styles = (theme: any) => ({
         margin: '.5em',
         display: 'inline-block',
         borderStyle: 'solid',
-        borderWidth: '0.5em',
         overflow: 'hidden',
         
         borderRadius: '0.25em',
@@ -33,7 +34,6 @@ const styles = (theme: any) => ({
         margin: '.5em',
         display: 'inline-block',
         borderStyle: 'solid',
-        borderWidth: '0.5em',
         overflow: 'hidden',
         
         borderRadius: '50%',
@@ -59,7 +59,7 @@ const styles = (theme: any) => ({
 })
 
 const Square = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
-    <div style={{borderColor: color}} className={classes.square}>
+    <div style={{borderColor: color, borderWidth: `${size / 6}em`}} className={classes.square}>
         <div style={{
             width: `${size}em`,
             height: `${size}em`,
@@ -68,26 +68,30 @@ const Square = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =
         }} />
     </div>
 
-const Triangle = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
-    <div className={classes.triangle} style={{
+const Triangle = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) => {
+    const borderWidth = .5, //size / 6,
+          baseByHeight = Math.sqrt(3) / 3
+
+    return <div className={classes.triangle} style={{
         borderBottomColor: color,
 
         // Equalateral triangle. Thanks Amima :)
-        borderBottomWidth: `${ size + 0.5 }em`,
-        borderRightWidth:  `${(size + 0.5) * Math.sqrt(3) / 3}em`,
-        borderLeftWidth:   `${(size + 0.5) * Math.sqrt(3) / 3}em`,
+        borderBottomWidth: `${ size + borderWidth }em`,
+        borderRightWidth:  `${(size + borderWidth) * baseByHeight}em`,
+        borderLeftWidth:   `${(size + borderWidth) * baseByHeight}em`,
     }}>
         <span className={classes.triangleInner} style={{
             opacity: 1 - opacity,
-            left:              `${-(size - 0.5) * Math.sqrt(3) / 3}em`,
-            borderBottomWidth: `${ size - 0.5 }em`,
-            borderRightWidth:  `${(size - 0.5) * Math.sqrt(3) / 3}em`,
-            borderLeftWidth:   `${(size - 0.5) * Math.sqrt(3) / 3}em`,
+            left:              `${-(size - borderWidth) * baseByHeight}em`,
+            borderBottomWidth: `${  size - borderWidth }em`,
+            borderRightWidth:  `${ (size - borderWidth) * baseByHeight}em`,
+            borderLeftWidth:   `${ (size - borderWidth) * baseByHeight}em`,
         }} />
     </div>
+}
 
 const Circle = ({size = 1, color = 'black', opacity = 1, classes = {} as any}) =>
-    <div style={{borderColor: color}} className={classes.circle}>
+    <div style={{borderColor: color, borderWidth: `${size / 6}em`}} className={classes.circle}>
         <div style={{
             width:  `${size}em`,
             height: `${size}em`,
@@ -111,14 +115,21 @@ class CardUI extends React.PureComponent<Props> {
     }
 
     render = () =>
-        <Grid item container md={4} sm={6} xs={12} justify="center">
-            <MaterialCard onClick={this.props.toggle} raised={this.props.selected} className={this.props.classes.card}>
-                <CardContent style={{height: '100%'}}>
+        <Grid item container sm={4} xs={6} justify="center">
+            <MaterialCard
+                onClick={this.props.toggle}
+                raised={this.props.selected}
+                className={this.props.classes.card}
+                style={{
+                    padding: `${isWidthDown('xs', this.props.width) ? 1 : 1.5}em 0`,
+                }}
+            >
+                <CardContent style={{height: '100%', padding: isWidthDown('xs', this.props.width) ? 0 : undefined}}>
                     {[...Array(1 + this.props.card.quantity)].map((_, i) => {
                         const Shape = CardUI.SHAPES[this.props.card.shape]
                         return <Shape
                             key={i}
-                            size={3}
+                            size={1 + +isWidthUp('sm', this.props.width) + +isWidthUp('md', this.props.width)}
                             color={CardUI.COLORS[this.props.card.color]}
                             opacity={this.props.card.opacity / 2}
                             classes={this.props.classes as any}
@@ -128,4 +139,4 @@ class CardUI extends React.PureComponent<Props> {
         </Grid>
 }
 
-export default withStyles(styles as any)(CardUI)
+export default withStyles(styles as any)(withWidth()(CardUI))
