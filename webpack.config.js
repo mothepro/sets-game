@@ -26,6 +26,8 @@ const plugins = [
         mobile: true,
         appMountId: 'app',
         lang: 'en',
+        devServer: !isProduction ? 'http://localhost:8080' : undefined,
+        headHtmlSnippet: '<style>body{text-align:center}</style>', // Keep centered cause its a game!
         scripts,
         links: [
             "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
