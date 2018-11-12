@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline, Dialog, DialogTitle, DialogContent, DialogContentText, Grid, Typography } from '@material-ui/core'
-import { Player } from 'sets-game-engine'
-import Menu from './Menu'
+import Menu, { ReadyOpts } from './Menu'
 import GameUI from './Game'
 
 interface Props {
@@ -10,15 +9,17 @@ interface Props {
 
 interface State {
   light: boolean
-  players: Player[]
+  inGame: boolean
   error?: Error
 }
 
+// TODO fix tabs
 export default class App extends React.Component<Props, State> {
 
-  public state: State = {
+  private gameProps?: ReadyOpts
+  readonly state: State = {
     light: true,
-    players: [],
+    inGame: false,
   }
 
   private static darkTheme = createMuiTheme({
@@ -43,6 +44,14 @@ export default class App extends React.Component<Props, State> {
 
   private onError = (error: Error) => this.setState({error})
 
+  private onReady = (opts?: ReadyOpts) => {
+    if (opts) {
+      const { players, rng, onTake } = opts
+      this.gameProps = { players, rng, onTake }
+    }
+    this.setState({inGame: true})
+  }
+
   render = () =>
     <>
       <CssBaseline/>
@@ -65,20 +74,21 @@ export default class App extends React.Component<Props, State> {
                     <pre>{this.state.error.stack}</pre>
                   </DialogContentText>
                 </DialogContent>
-              </Dialog>
-          }
-
-          <Typography variant="h2" align="center" style={{marginTop: '.5em'}}>Sets</Typography>
+              </Dialog> }
 
           <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
-            { this.state.players.length
-                ? <GameUI
-                    players={this.state.players}
-                    rng={(max: number) => Math.floor(Math.random() * max)} />
+            <Grid item xs={12}>
+              <Typography variant="h2">
+                Sets 
+                <span style={{fontSize: '.25em', marginLeft: '1em'}}>by Mo</span>
+              </Typography>
+            </Grid>
+            { this.state.inGame
+                ? <GameUI {...this.gameProps} />
                 : <Menu
                     package={this.props.package}
                     onError={this.onError}
-                    onReady={players => this.setState({players})} /> }
+                    onReady={this.onReady} /> }
           </Grid>
       </MuiThemeProvider>
     </>
