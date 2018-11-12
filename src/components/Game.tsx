@@ -101,7 +101,7 @@ export default class GameUI extends React.Component<Props, State> {
             setInterval(
                 () => this.state.bans[index] && // premature unban
                     this.setState({ bans: { [index]: (Date.now() - startTime) / timeout * 100 } }),
-                Math.ceil(Math.max(timeout / 100, 1000 / 60)) // try to update frame or every whole percent
+                Math.ceil(1000 / 60) // try to update every frame
             ) as unknown as number
         )
     }
