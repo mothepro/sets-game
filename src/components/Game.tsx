@@ -26,8 +26,8 @@ export default class GameUI extends React.Component<Props, State> {
     private readonly game = new Game({
         rng: this.props.rng,
         shoe: 2,
-        timeout: 1000,
-        nextTimeout: (oldTimeout: number) => 2 * oldTimeout
+        timeout: 5 * 1000, // ban for 5 seconds by default
+        nextTimeout: (oldTimeout: number) => 2 * oldTimeout // double each ban individually
     })
     private readonly players: Player[] = []
     private mainPlayer?: Player // will be known at mount time
