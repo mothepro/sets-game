@@ -33,24 +33,18 @@ export default class Menu extends React.Component<Props, State> {
     private node?: P2P<string>
 
     private startOnline = async (e: React.FormEvent) => {
-        if(this.canPlayOnline) {
-            e.preventDefault()
-            this.setState({loading: true})
+        e.preventDefault()
+        this.setState({loading: true})
 
-            this.node = new P2P(this.state.name, this.props.package, {allowSameBrowser: true})
-            this.node.on(Events.error, (err: Error) => this.props.onError && this.props.onError(err))
-            this.node.on(Events.peerChange, this.updatePeers)
-            await this.node.joinLobby()
+        this.node = new P2P(this.state.name, this.props.package, {allowSameBrowser: true})
+        this.node.on(Events.error, (err: Error) => this.props.onError && this.props.onError(err))
+        this.node.on(Events.peerChange, this.updatePeers)
+        await this.node.joinLobby()
 
-            this.setState({loading: false, online: true})
-        }
+        this.setState({loading: false, online: true})
     }
 
-    private get canPlayOnline() {
-        return !this.state.loading && this.state.name.trim().length >= 2
-    }
-
-    private updatePeers = () => setTimeout(()=>this.setState({peers: [...this.node!.peers]}), 0)
+    private updatePeers = () => setTimeout(() => this.setState({peers: [...this.node!.peers]}), 0)
 
     render() {
         return this.state.online
@@ -81,7 +75,7 @@ export default class Menu extends React.Component<Props, State> {
                         color="primary"
                         size="large"
                         type="submit"
-                        disabled={!this.canPlayOnline} >
+                        disabled={this.state.loading || this.state.name.trim().length < 2} >
                             Play with People
                             {this.state.loading &&
                                 <CircularProgress
