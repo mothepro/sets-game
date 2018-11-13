@@ -65,16 +65,15 @@ export default class App extends React.Component<Props, State> {
               <Icon fontSize="small">wb_incandescent</Icon>
           </IconButton>
 
-          { this.state.error &&
-              <Dialog open={true}>
-                <DialogTitle id="alert-dialog-title">Aww man... An error has occured</DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    {this.state.error.message}
-                    <pre>{this.state.error.stack}</pre>
-                  </DialogContentText>
-                </DialogContent>
-              </Dialog> }
+          {this.state.error &&
+            <Dialog open>
+              <DialogTitle>Aww man... An error has occured</DialogTitle>
+              <DialogContent>
+                <DialogContentText>{this.state.error.message}</DialogContentText>
+                <pre style={{textAlign: 'left'}}>{this.state.error.stack}</pre>
+                <pre style={{textAlign: 'left'}}>{JSON.stringify({...this.state.error}, null, 2)}</pre>
+              </DialogContent>
+            </Dialog> }
 
           <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
             <Grid item xs={12}>
