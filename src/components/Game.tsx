@@ -19,6 +19,8 @@ interface State {
     cards: ReadonlyArray<Card>
     selected: index[] // indexs of the cards in state
     bans: { [playerIndex: number]: number } // how far the player has progressed on their ban
+    scores: number[]
+    finished: boolean
 }
 
 export default class GameUI extends React.Component<Props, State> {
@@ -27,7 +29,7 @@ export default class GameUI extends React.Component<Props, State> {
         rng: this.props.rng,
         shoe: 2,
         timeout: 5 * 1000, // ban for 5 seconds by default
-        nextTimeout: (oldTimeout: number) => 2 * oldTimeout // double each ban individually
+        nextTimeout: (oldTimeout: number) => oldTimeout + 5 * 1000 // increase ban individually
     })
     private readonly players: Player[] = []
     private mainPlayer?: Player // will be known at mount time
@@ -37,6 +39,8 @@ export default class GameUI extends React.Component<Props, State> {
         cards: [],
         selected: [],
         bans: {},
+        scores: (new Array(this.props.players)).fill(0),
+        finished: true,
     }
 
     /** Defualts for single player mode */
@@ -52,18 +56,22 @@ export default class GameUI extends React.Component<Props, State> {
             this.game.addPlayer(player)
         }
 
+        this.game.on(Events.start, () => this.mainPlayer = this.players[0])
         this.game.on(Events.playerBanned, this.onBan)
         this.game.on(Events.playerUnbanned, this.onUnban)
-        this.game.on(Events.start, this.onStart)
+        this.game.on(Events.marketFilled, () => this.setState({cards: [...this.game.playableCards]}))
+        this.game.on(Events.marketGrab, () => this.setState({scores: this.players.map(player => player.score)}))
+        this.game.on(Events.finish, () => this.setState({finished: true}))
 
         this.game.start()
     }
 
     /** Main player tries to take a set */
     private takeSet = () => {
-        this.mainPlayer!.takeSet(...this.state.selected as SetIndexs)
         if(this.props.onTakeAttempt)
             this.props.onTakeAttempt(this.state.selected as SetIndexs)
+        else // by default main player will take it
+            this.mainPlayer!.takeSet(...this.state.selected as SetIndexs)
         this.setState({selected: []})
     }
 
@@ -77,12 +85,6 @@ export default class GameUI extends React.Component<Props, State> {
         if(this.props.onToggle)
             this.props.onToggle(index)
         this.setState({selected})
-    }
-
-    /** Game is ready */
-    private onStart = () => {
-        this.mainPlayer = this.players[0]
-        this.setState({cards: this.game.playableCards})
     }
 
     /** When any player is banned */
@@ -127,8 +129,11 @@ export default class GameUI extends React.Component<Props, State> {
                 marginTop: -25,
                 marginLeft: -25,
             }} />
+        : this.state.finished
+        ? // Game is finished. Show the winners
+            <Typography>All done. <pre>{JSON.stringify(this.game.winners, null, 2)}</pre></Typography>
         : <>
-            {this.game.playableCards.map((card, i) =>
+            {this.state.cards.map((card, i) =>
                 <CardUI
                     key={i}
                     card={card}
@@ -165,9 +170,9 @@ export default class GameUI extends React.Component<Props, State> {
                 <Grid item sm>
                     {this.props.players == 1 // solo
                         ? <Typography variant="h5">
-                            {this.mainPlayer.score == 0
-                                ? 'You have not collected any sets yet.' 
-                                : `You have collected ${this.mainPlayer.score} set${this.mainPlayer.score > 1 ? 's' : ''}.`}
+                            {this.state.scores[0] == 0
+                                ? 'You have not collected any sets yet'
+                                : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
                         </Typography>
                         : false }
                 </Grid>
