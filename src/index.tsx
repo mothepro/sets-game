@@ -4,7 +4,7 @@ import { render } from 'react-dom'
 import App from './components/App'
 
 render(
-    <App package={`${name}@${version}`} />,
+    <App package={`${process.env.NODE_ENV == 'development' ? 'dev-' : ''}${name}@${version}`} />,
     document.getElementById('app')
 )
 

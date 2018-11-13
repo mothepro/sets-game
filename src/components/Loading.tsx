@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { CircularProgress, Typography } from "@material-ui/core"
+import { CircularProgress, Typography } from '@material-ui/core'
 import { CircularProgressProps } from '@material-ui/core/CircularProgress'
-
 
 export default function(props: CircularProgressProps) {
     let { children, size } = props
@@ -13,11 +12,10 @@ export default function(props: CircularProgressProps) {
         children = <Typography variant="overline" style={{marginTop: '1em'}}>{children}</Typography>
 
     return <div style={{
-            position:   'absolute',
-            top:        '50%',
-            left:       '50%',
-            marginTop:  size / -2,
-            marginLeft: size / -2,
+            position:  'absolute',
+            top:       '50%',
+            left:      '50%',
+            transform: 'translate(-50%, -50%)',
         }} >
             <CircularProgress {...props} size={size} />
             {children}
