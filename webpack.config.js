@@ -32,12 +32,23 @@ const plugins = [
         appMountId: 'app',
         lang: 'en',
         devServer: !isProduction ? 'http://localhost:8080' : undefined,
-        headHtmlSnippet: `<style>${styles.join(' ').replace(/\s/g, '')}</style>`, 
+        headHtmlSnippet: `<style>${styles.join(' ')}</style>`, 
         scripts,
         links: [
             "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
             "https://fonts.googleapis.com/icon?family=Material+Icons",
         ],
+        minify: isProduction && {
+            minifyCSS: true,
+            minifyJS: true,
+            removeAttributeQuotes: true,
+            removeEmptyAttributes: true,
+            removeRedundantAttributes: true,
+            removeScriptTypeAttributes: true,
+            useShortDoctype: true,
+            collapseWhitespace: true,
+            collapseBooleanAttributes: true,
+        }
     }),
 ]
 
