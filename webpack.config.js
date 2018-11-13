@@ -8,12 +8,12 @@ const scripts = isProduction
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.production.min.js',
-        'https://unpkg.com/p2p-lobby@0.0.16/dist/umd/bundle.min.js',
+        'https://unpkg.com/p2p-lobby@0.0.17/dist/umd/bundle.min.js',
     ] : [ // Development CDN links (makes building faster)
         'https://unpkg.com/react@16.6.1/umd/react.development.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.development.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.development.js',
-        'https://unpkg.com/p2p-lobby@0.0.16/dist/umd/bundle.js',
+        'https://unpkg.com/p2p-lobby@0.0.17/dist/umd/bundle.js',
     ]
 
 const styles = [
@@ -32,7 +32,7 @@ const plugins = [
         appMountId: 'app',
         lang: 'en',
         devServer: !isProduction ? 'http://localhost:8080' : undefined,
-        headHtmlSnippet: `<style>${styles.join(' ')}</style>`, 
+        headHtmlSnippet: `<style>${styles.join('\n')}</style>`, 
         scripts,
         links: [
             "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
