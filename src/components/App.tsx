@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline, Dialog, DialogTitle, DialogContent, DialogContentText, Grid, Typography } from '@material-ui/core'
-import Menu, { ReadyOpts } from './Menu'
-import GameUI from './Game'
+import Menu from './Menu'
+import GameUI, { Props as GameProps } from './Game'
 
 interface Props {
     package: string
@@ -15,7 +15,7 @@ interface State {
 
 export default class App extends React.Component<Props, State> {
 
-    private gameProps?: ReadyOpts
+    private gameProps?: GameProps
     readonly state: State = {
         light: true,
         inGame: false,
@@ -42,7 +42,7 @@ export default class App extends React.Component<Props, State> {
 
     private onError = (error: Error) => this.setState({error})
 
-    private onReady = (opts?: ReadyOpts) => {
+    private onReady = (opts?: GameProps) => {
         if (opts)
             this.gameProps = opts
         this.setState({inGame: true})
