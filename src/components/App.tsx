@@ -43,47 +43,44 @@ export default class App extends React.Component<Props, State> {
     private onError = (error: Error) => this.setState({error})
 
     private onReady = (opts?: GameProps) => {
-        if (opts)
-            this.gameProps = opts
+        this.gameProps = opts
         this.setState({inGame: true})
     }
 
-    render = () => <>
-        <CssBaseline/>
+    render = () =>
         <MuiThemeProvider theme={this.state.light ? App.lightTheme : App.darkTheme}>
+            <CssBaseline />
 
-                <IconButton onClick={this.toggleTheme} style={{
-                        position: 'absolute',
-                        right:    App.lightTheme.spacing.unit,
-                        top:      App.lightTheme.spacing.unit,
-                }}>
-                        <Icon fontSize="small">wb_incandescent</Icon>
-                </IconButton>
+            <IconButton onClick={this.toggleTheme} style={{
+                    position: 'absolute',
+                    right:    App.lightTheme.spacing.unit,
+                    top:      App.lightTheme.spacing.unit,
+            }}>
+                    <Icon fontSize="small">wb_incandescent</Icon>
+            </IconButton>
 
-                {this.state.error &&
-                    <Dialog open>
-                        <DialogTitle>Aww man... An error has occured</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>{this.state.error.message}</DialogContentText>
-                            <pre style={{textAlign: 'left'}}>{this.state.error.stack}</pre>
-                            <pre style={{textAlign: 'left'}}>{JSON.stringify({...this.state.error}, null, 2)}</pre>
-                        </DialogContent>
-                    </Dialog> }
+            {this.state.error &&
+                <Dialog open>
+                    <DialogTitle>Aww man... An error has occured</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{this.state.error.message}</DialogContentText>
+                        <pre style={{textAlign: 'left'}}>{this.state.error.stack}</pre>
+                        <pre style={{textAlign: 'left'}}>{JSON.stringify({...this.state.error}, null, 2)}</pre>
+                    </DialogContent>
+                </Dialog> }
 
-                <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
-                    <Grid item xs={12}>
-                        <Typography variant="h2">
-                            Sets 
-                            <span style={{fontSize: '.25em', marginLeft: '1em'}}>by Mo</span>
-                        </Typography>
-                    </Grid>
-                    { this.state.inGame
-                            ? <GameUI {...this.gameProps} />
-                            : <Menu
-                                    package={this.props.package}
-                                    onError={this.onError}
-                                    onReady={this.onReady} /> }
+            <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
+                <Grid item xs={12}>
+                    <Typography variant="h2" gutterBottom>
+                        Sets 
+                        <span style={{fontSize: '.25em', marginLeft: '1em'}}>by Mo</span>
+                    </Typography>
                 </Grid>
+                { this.state.inGame
+                        ? <GameUI {...this.gameProps} />
+                        : <Menu package={this.props.package}
+                                onError={this.onError}
+                                onReady={this.onReady} /> }
+            </Grid>
         </MuiThemeProvider>
-    </>
 }

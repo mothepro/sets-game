@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Player, Game, Card, Events } from 'sets-game-engine'
-import { Grid, Button, Icon, Typography, CircularProgress } from '@material-ui/core'
+import { Grid, Button, Icon, Typography, CircularProgress, Paper, List, ListItem, ListItemText } from '@material-ui/core'
 import Clock from './Clock'
 import CardUI from './Card'
 import Loading from './Loading';
@@ -148,7 +148,7 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({bans})
     }
 
-    render = () => !this.mainPlayer ? <Loading size={50} /> : // Waiting for game to start
+    render = () => !this.mainPlayer ? <Loading size={64} /> : // Waiting for game to start
         this.state.finished ? // Game is finished. Show the winners
             <Typography>All done. <pre>{JSON.stringify(this.game.winners, null, 2)}</pre></Typography>
         : <>
@@ -160,7 +160,7 @@ export default class GameUI extends React.Component<Props, State> {
                     toggle={() => this.toggleCard(i)}
                 /> )}
             <Grid container style={{marginTop: '2em'}} justify="space-around" spacing={24}>
-                <Grid item sm>
+                <Grid item sm xs={12}>
                     <Button
                         variant="contained"
                         color="primary"
@@ -178,14 +178,31 @@ export default class GameUI extends React.Component<Props, State> {
                                 value={this.state.bans[0]} /> }
                     </Button>
                 </Grid>
-                <Grid item sm>
-                    {this.props.players == 1 // solo
-                        ? <Typography variant="h5">
+                <Grid item sm xs={12}>
+                    {this.props.players == 1
+                        ? // Just show a sentence in solo mode
+                        <Typography variant="h5">
                             {this.state.scores[0] == 0
                                 ? 'You have not collected any sets yet'
                                 : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
                         </Typography>
-                        : false }
+                        : // Leaderboard
+                        <Paper>
+                            <List>
+                                {this.props.names.map((name, index) =>
+                                    <ListItem key={index} disabled={!!this.state.bans[index]}>
+                                        <ListItemText>
+                                            <Typography variant="overline" style={{float: 'right'}}>{this.state.scores[index]}</Typography>
+                                            {name}
+                                        </ListItemText>
+                                        {this.state.bans[index] && // player is banned
+                                            <Loading
+                                                variant="determinate"
+                                                color="secondary"
+                                                value={this.state.bans[index]} />}
+                                    </ListItem> )}
+                            </List>
+                        </Paper> }
                 </Grid>
                 <Grid item sm>
                     <Clock />
