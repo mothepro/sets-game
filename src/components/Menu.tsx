@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Button, TextField, Grid, CircularProgress, Typography, List, ListItem, ListItemText, Paper, ListSubheader, Divider } from '@material-ui/core'
+import { Button, TextField, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider, Icon } from '@material-ui/core'
 import P2P, { Events } from 'p2p-lobby'
 import { Props as GameProps } from './Game'
 import Loading from './Loading';
@@ -94,20 +94,12 @@ export default class Menu extends React.Component<Props, State> {
         this.node!.on(Events.error, this.error)
         this.node!.on(Events.disconnected, () => this.error(Error('Disconnected from network. Try Refreshing.')))
         this.node!.on(Events.peerLeft, peerId => this.error(Error(`${this.node!.peers.get(peerId)} left the game`)))
-        this.node!.on(Events.lobbyLeft, peerId => {
-            alert(`${this.node!.peers.get(peerId)} left the lobby???`)
-            setTimeout(() => {
-                alert(JSON.stringify([...this.node!.peers], null, 2))
-                alert(JSON.stringify([...this.node!.lobbyPeers], null, 2))
-                alert(JSON.stringify([...this.node!.myPeers], null, 2))
-            }, 500)
-        })
 
         this.node!.on(Events.data, ({peer, data}) => {
             if (peerIndex[peer] != undefined && Array.isArray(data) && data.length == 3)
                 takeSet(peerIndex[peer], data as [number, number, number])
             else
-                this.error(Error(`Recieved bad data from ${this.node!.peers.get(peer)}`), {data})
+                this.error(Error(`Recieved unexpected data from ${this.node!.peers.get(peer)}.`), {data})
         })
 
         this.props.onReady({
@@ -115,11 +107,8 @@ export default class Menu extends React.Component<Props, State> {
             preventTakeAction: true,
             rng:           max => Math.abs(this.node!.random(true)) % max,
             players:       1 + this.node!.peers.size,
-            takeSet:       arg => takeSet = arg,
-            onTakeAttempt: set => {
-                alert('taaake ' + JSON.stringify(set))
-                this.node!.broadcast(set)
-            },
+            takeSet:       action => takeSet = action, // save the action to the outer scope
+            onTakeAttempt: set => this.node!.broadcast(set),
         })
     }
 
@@ -139,23 +128,25 @@ export default class Menu extends React.Component<Props, State> {
             ? <Loading size={64}>Searching for other players</Loading>
             : this.state.lobby // Is in main lobby vs player's room
                 ? // In the lobby, looking to connect or waiting
-                <Paper>
-                    <List subheader={<ListSubheader>Join a player's group</ListSubheader>}>
-                        <Divider />
-                        {this.state.peers.map(([id, name]) =>
-                            <ListItem
-                                key={id}
-                                button
-                                disabled={this.state.loading}
-                                onClick={() => this.joinPlayer(id)}>
-                                <ListItemText primary={name} />
-                            </ListItem> )}
-                    </List>
-                    {this.state.loading && <Loading />}
-                </Paper>
+                <Grid item container sm={6} md={4}>
+                    <Paper style={{width: '100%'}}>
+                        <List subheader={<ListSubheader>Join a player's group</ListSubheader>}>
+                            <Divider />
+                            {this.state.peers.map(([id, name]) =>
+                                <ListItem
+                                    key={id}
+                                    button
+                                    disabled={this.state.loading}
+                                    onClick={() => this.joinPlayer(id)}>
+                                    <ListItemText primary={name} />
+                                </ListItem> )}
+                        </List>
+                        {this.state.loading && <Loading />}
+                    </Paper>
+                </Grid>
                 : // In a room
-                <>
-                    <Paper>
+                <Grid item container sm={6} md={4} justify="center">
+                    <Paper style={{width: '100%'}}>
                         <List subheader={<ListSubheader>Players in group</ListSubheader>}>
                             <Divider />
                             {this.state.peers.map(([id, name]) =>
@@ -166,6 +157,7 @@ export default class Menu extends React.Component<Props, State> {
                     </Paper>
                     {this.state.canReadyUp &&
                         <Button
+                            style={{marginTop: '2em'}} // clean these up
                             disabled={this.state.loading}
                             variant="contained"
                             color="primary"
@@ -174,7 +166,7 @@ export default class Menu extends React.Component<Props, State> {
                             Start Game
                             {this.state.loading && <Loading />}
                         </Button> }
-                </>
+                </Grid>
         : // Main Menu
         <> 
             <Grid item container justify="center" sm={6}>
@@ -183,6 +175,7 @@ export default class Menu extends React.Component<Props, State> {
                     color="primary"
                     size="large"
                     onClick={() => this.props.onReady()} >
+                    <Icon style={{margin: '.5em 1em .5em 0'}}>person_outline</Icon>
                     Play Solo
                 </Button>
             </Grid>
@@ -206,6 +199,7 @@ export default class Menu extends React.Component<Props, State> {
                         color="primary"
                         size="large"
                         type="submit" >
+                            <Icon style={{margin: '.5em 1em .5em 0'}}>people_outline</Icon>
                             Play with People
                             {this.state.loading && <Loading />}
                     </Button>
