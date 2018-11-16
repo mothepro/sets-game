@@ -61,7 +61,7 @@ export default class App extends React.Component<Props, State> {
 
             {this.state.error &&
                 <Dialog open>
-                    <DialogTitle>Aww man... An error has occured</DialogTitle>
+                    <DialogTitle>Oh no... An error has occured</DialogTitle>
                     <DialogContent>
                         <DialogContentText>{this.state.error.message}</DialogContentText>
                         <Typography

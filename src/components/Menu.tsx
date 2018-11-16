@@ -66,10 +66,11 @@ export default class Menu extends React.Component<Props, State> {
 
         // Only update the lobby if no one is in our room
         this.node.on(Events.lobbyConnect, () => this.setState({loading: false, online: true}))
-        this.node.on(Events.lobbyChange, () => !this.node!.inGroup && this.setState({peers: [...this.node!.lobbyPeers]}))
+        this.node.on(Events.lobbyChange,  () => !this.node!.inGroup && this.setState({peers: [...this.node!.lobbyPeers]}))
 
-        this.node.on(Events.groupStart, () => this.setState({loading: false}))
-        this.node.on(Events.groupChange, () => this.setState({
+        this.node.on(Events.groupStart,     () => this.setState({loading: false}))
+        this.node.on(Events.groupReadyInit, () => this.setState({loading: true}))
+        this.node.on(Events.groupChange,    () => this.setState({
             peers:      [...this.node!.groupPeers],
             hasGroup:   this.node!.inGroup,
             canReadyUp: this.node!.isLeader,
@@ -80,8 +81,6 @@ export default class Menu extends React.Component<Props, State> {
 
     /** When the room host ready's up. */
     private onReady = () => {
-        this.setState({loading: true})
-
         // This is the action to grab a set for a player on the local game
         let takeSet: (player: number, set: [number, number, number]) => void
 
@@ -98,8 +97,7 @@ export default class Menu extends React.Component<Props, State> {
         this.node!.on(Events.error, this.error)
         this.node!.on(Events.disconnected, () => this.error(Error('Disconnected from network. Try Refreshing.')))
         this.node!.on(Events.groupLeft, peerId => this.error(Error(`${this.node!.getPeerName(peerId)} left the game`)))
-
-        this.node!.on(Events.data, ({peer, data}) => {
+        this.node!.on(Events.data, ({peer, data}) => { // where the magic happens
             if (peerIndex[peer] != undefined && Array.isArray(data) && data.length == 3)
                 takeSet(peerIndex[peer], data as [number, number, number])
             else

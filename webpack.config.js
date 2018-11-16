@@ -8,7 +8,9 @@ const scripts = isProduction
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.production.min.js',
-        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.min.js',
+        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.js',
+        // Seems that this build is broken somehow?? (Probably the experimental methods)
+        // 'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.min.js',
     ] : [ // Development CDN links (makes building faster)
         'https://unpkg.com/react@16.6.1/umd/react.development.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.development.js',
