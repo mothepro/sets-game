@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface State {
-    light: boolean
+    lightTheme: boolean
     inGame: boolean
     error?: Error
 }
@@ -17,7 +17,7 @@ export default class App extends React.Component<Props, State> {
 
     private gameProps?: GameProps
     readonly state: State = {
-        light: true,
+        lightTheme: true,
         inGame: false,
     }
 
@@ -34,11 +34,9 @@ export default class App extends React.Component<Props, State> {
         return error
     }
 
-    /** Switches Material UI Theme and body's background color */
-    private toggleTheme = () => {
-        document.body.style.backgroundColor = (!this.state.light ? App.lightTheme : App.darkTheme).palette.background.default
-        this.setState({light: !this.state.light})
-    }
+    private toggleTheme = () => this.setState({lightTheme: !this.state.lightTheme})
+
+    private goBack = () => this.setState({inGame: false})
 
     private onError = (error: Error) => this.setState({error})
 
@@ -48,7 +46,7 @@ export default class App extends React.Component<Props, State> {
     }
 
     render = () =>
-        <MuiThemeProvider theme={this.state.light ? App.lightTheme : App.darkTheme}>
+        <MuiThemeProvider theme={this.state.lightTheme ? App.lightTheme : App.darkTheme}>
             <CssBaseline />
 
             <IconButton onClick={this.toggleTheme} style={{
@@ -58,6 +56,15 @@ export default class App extends React.Component<Props, State> {
             }}>
                     <Icon fontSize="small">wb_incandescent</Icon>
             </IconButton>
+
+            {this.state.inGame &&
+                <IconButton onClick={this.goBack} style={{
+                        position: 'absolute',
+                        left:     App.lightTheme.spacing.unit,
+                        top:      App.lightTheme.spacing.unit,
+                }}>
+                        <Icon fontSize="small">arrow_back</Icon>
+                </IconButton> }
 
             {this.state.error &&
                 <Dialog open>

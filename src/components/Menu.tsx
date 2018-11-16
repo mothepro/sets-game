@@ -141,7 +141,7 @@ export default class Menu extends React.Component<Props, State> {
                 : // In a room
                 <Grid item container sm={6} md={4} justify="center">
                     <Paper style={{width: '100%'}}>
-                        <List subheader={<ListSubheader>Players your group</ListSubheader>}>
+                        <List subheader={<ListSubheader>Players in your group</ListSubheader>}>
                             <Divider />
                             {this.state.peers.map(([id, name]) =>
                                 <ListItem key={id}>
@@ -149,8 +149,8 @@ export default class Menu extends React.Component<Props, State> {
                                 </ListItem> )}
                         </List>
                     </Paper>
-                    {this.state.canReadyUp &&
-                        <Button
+                    {this.state.canReadyUp
+                        ? <Button
                             style={{marginTop: '2em'}} // clean these up
                             disabled={this.state.loading}
                             variant="contained"
@@ -159,7 +159,12 @@ export default class Menu extends React.Component<Props, State> {
                             onClick={() => this.node!.readyUp()} >
                             Start Game
                             {this.state.loading && <Loading />}
-                        </Button> }
+                        </Button>
+                        : <Loading size={64}>
+                            {!this.state.loading
+                                ? 'Waiting for group leader to start' // technically not loading...
+                                : 'Starting Game'}
+                        </Loading> }
                 </Grid>
         : // Main Menu
         <> 
