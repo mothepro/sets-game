@@ -31,41 +31,6 @@ export default class Menu extends React.Component<Props, State> {
     }
     private node?: P2P<string>
 
-    /** Create a node and bind its events to the dom */
-    private startOnline = async (e: React.FormEvent) => {
-        e.preventDefault()
-        this.setState({loading: true})
-
-        if (!this.node)
-            this.node = new P2P(this.state.name, this.props.package, {
-                allowSameBrowser: true,
-                maxIdleTime: 10 * 60 * 1000,
-            })
-
-        this.node.on(Events.error, this.error)
-        this.node.on(Events.groupReady, this.onReady)
-        this.node.on(Events.disconnected, () => this.setState({online: false}))
-        // Only update the lobby if no one is in our room
-        this.node.on(Events.lobbyChange, () => !this.node!.inGroup && this.setState({peers: [...this.node!.lobbyPeers]}))
-        this.node.on(Events.groupChange, () => this.setState({
-            peers:      [...this.node!.groupPeers],
-            hasGroup:   this.node!.inGroup,
-            canReadyUp: this.node!.isLeader,
-        }))
-
-        await this.node.joinLobby()
-
-        this.setState({
-            loading: true,
-            online: true,
-
-            // clean start
-            hasGroup: false,
-            canReadyUp: false,
-            peers: [],
-        })
-    }
-
     /** Simple error handling, tell the parent and disconnect */
     error = (err: Error, args?: { [prop: string]: any }) => {
         if (args)
@@ -79,10 +44,45 @@ export default class Menu extends React.Component<Props, State> {
             this.node.disconnect()
     }
 
+    /** Create a node and bind its events to the dom */
+    private startOnline = async (e: React.FormEvent) => {
+        e.preventDefault()
+        this.setState({ // for a clean start
+            loading: true,
+            hasGroup: false,
+            canReadyUp: false,
+            peers: [],
+        })
+
+        if (!this.node)
+            this.node = new P2P(this.state.name, this.props.package, {
+                allowSameBrowser: true,
+                maxIdleTime: 10 * 60 * 1000,
+            })
+
+        this.node.on(Events.error, this.error)
+        this.node.on(Events.groupReady, this.onReady)
+        this.node.on(Events.disconnected, () => this.setState({online: false}))
+
+        // Only update the lobby if no one is in our room
+        this.node.on(Events.lobbyConnect, () => this.setState({loading: false, online: true}))
+        this.node.on(Events.lobbyChange, () => !this.node!.inGroup && this.setState({peers: [...this.node!.lobbyPeers]}))
+
+        this.node.on(Events.groupStart, () => this.setState({loading: false}))
+        this.node.on(Events.groupChange, () => this.setState({
+            peers:      [...this.node!.groupPeers],
+            hasGroup:   this.node!.inGroup,
+            canReadyUp: this.node!.isLeader,
+        }))
+
+        await this.node.joinLobby()
+    }
+
     /** When the room host ready's up. */
     private onReady = () => {
         this.setState({loading: true})
 
+        // This is the action to grab a set for a player on the local game
         let takeSet: (player: number, set: [number, number, number]) => void
 
         const peerIndex: { [id: string]: number } = { [this.node!['id']]: 0 }
@@ -116,17 +116,6 @@ export default class Menu extends React.Component<Props, State> {
         })
     }
 
-    private joinPlayer = async (peer: string) => {
-        this.setState({loading: true})
-        await this.node!.joinGroup(peer)
-        this.setState({
-            loading: false,
-            hasGroup: false,
-            peers: [],
-            canReadyUp: false,
-        })
-    }
-
     render = () => this.state.online
         ? this.state.peers.length == 0 // Is connected to others
             ? <Loading size={64}>Searching for other players</Loading>
@@ -134,24 +123,27 @@ export default class Menu extends React.Component<Props, State> {
                 ? // In the lobby, looking to connect or waiting
                 <Grid item container sm={6} md={4}>
                     <Paper style={{width: '100%'}}>
-                        <List subheader={<ListSubheader>Join a player's group</ListSubheader>}>
+                        <List subheader={<ListSubheader>Choose a player to join their group</ListSubheader>}>
                             <Divider />
                             {this.state.peers.map(([id, name]) =>
                                 <ListItem
                                     key={id}
                                     button
                                     disabled={this.state.loading}
-                                    onClick={() => this.joinPlayer(id)}>
+                                    onClick={() => {
+                                        this.setState({loading: true})
+                                        this.node!.joinGroup(id)
+                                    }}>
                                     <ListItemText primary={name} />
                                 </ListItem> )}
                         </List>
-                        {this.state.loading && <Loading />}
+                        {this.state.loading && <Loading size={64}>Connecting to Group</Loading>}
                     </Paper>
                 </Grid>
                 : // In a room
                 <Grid item container sm={6} md={4} justify="center">
                     <Paper style={{width: '100%'}}>
-                        <List subheader={<ListSubheader>Players in group</ListSubheader>}>
+                        <List subheader={<ListSubheader>Players your group</ListSubheader>}>
                             <Divider />
                             {this.state.peers.map(([id, name]) =>
                                 <ListItem key={id}>
