@@ -44,15 +44,12 @@ interface State {
 
 export default class GameUI extends React.Component<Props, State> {
 
-    private readonly game = new Game({
-        rng: this.props.rng,
-        shoe: 2,
-        timeout: 5 * 1000, // ban for 5 seconds by default
-        nextTimeout: (oldTimeout: number) => oldTimeout + 5 * 1000 // increase ban individually
-    })
-    private readonly players: Player[] = []
-    private mainPlayer?: Player // will be known at mount time
     private banHandles: WeakMap<Player, number> = new WeakMap
+
+    // will be known at mount time
+    private game!: Game
+    private readonly players: Player[] = []
+    private mainPlayer!: Player
 
     readonly state: State = {
         cards: [],
@@ -73,6 +70,15 @@ export default class GameUI extends React.Component<Props, State> {
     componentWillUnmount = () => this.game.removeAllListeners()
 
     componentDidMount() {
+        // Make the game here in case our RNG method switches
+        this.game = new Game({
+            rng: this.props.rng,
+            nextTimeout: (oldTimeout: number) => oldTimeout == 0
+                ? 5 * 1000              // ban for 5 seconds by default
+                : oldTimeout + 5 * 1000 // increase ban individually
+        })
+        this.players.length = 0 // clear it here
+
         for(let i = 0; i < this.props.players; i++) {
             let player = new Player
             this.players.push(player)
@@ -148,7 +154,7 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({bans})
     }
 
-    render = () => !this.mainPlayer ? <Loading size={64} /> : // Waiting for game to start
+    render = () => !this.mainPlayer ? <Loading size={64} /> : // Waiting for game to start (mount)
         this.state.finished ? // Game is finished. Show the winners
             <Typography>All done. <pre>{JSON.stringify(this.game.winners, null, 2)}</pre></Typography>
         : <>
