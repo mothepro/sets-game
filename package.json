@@ -1,6 +1,6 @@
 {
   "name": "sets-game",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "start": "webpack-dev-server --mode development",
     "dev": "webpack",
