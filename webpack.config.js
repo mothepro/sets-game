@@ -8,12 +8,12 @@ const scripts = isProduction
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.production.min.js',
-        'https://unpkg.com/p2p-lobby@0.0.17/dist/umd/bundle.min.js',
+        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.min.js',
     ] : [ // Development CDN links (makes building faster)
         'https://unpkg.com/react@16.6.1/umd/react.development.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.development.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.development.js',
-        'https://unpkg.com/p2p-lobby@0.0.17/dist/umd/bundle.js',
+        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.js',
     ]
 
 const styles = [
@@ -65,7 +65,6 @@ module.exports = {
         'react-dom': 'ReactDOM',
         'p2p-lobby': 'p2p',
         '@material-ui/core': 'window["material-ui"]',
-        // '@material-ui/icons': 'material-icons',
     },
     output: {
         path: path.resolve(__dirname, 'bin'),

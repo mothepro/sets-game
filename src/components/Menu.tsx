@@ -14,7 +14,7 @@ interface State {
     name: string
     loading: boolean
     online: boolean
-    lobby: boolean
+    hasGroup: boolean
     canReadyUp: boolean // this should be an attribute in the node
     peers: [string, string][] // Map<PeerID, name>
 }
@@ -25,7 +25,7 @@ export default class Menu extends React.Component<Props, State> {
         name: '',
         loading: false,
         online: false,
-        lobby: true,
+        hasGroup: true,
         canReadyUp: false,
         peers: [],
     }
@@ -42,23 +42,28 @@ export default class Menu extends React.Component<Props, State> {
                 maxIdleTime: 10 * 60 * 1000,
             })
 
-        this.node.on(Events.error,        this.error)
-        this.node.on(Events.roomReady,    this.onReady)
-        this.node.on(Events.lobbyConnect, () => this.setStateWait({peers: [...this.node!.peers], lobby: true}))
-        // Go offline when disconnected
-        this.node.on(Events.disconnected, () => this.setState({    peers: [], loading: false, online: false, lobby: true}))
-        // Listen for changes to peer list
-        this.node.on(Events.peerConnect,  () => this.setStateWait({peers: [...this.node!.peers], lobby: false, canReadyUp: false}))
+        this.node.on(Events.error, this.error)
+        this.node.on(Events.groupReady, this.onReady)
+        this.node.on(Events.disconnected, () => this.setState({online: false}))
         // Only update the lobby if no one is in our room
-        this.node.on(Events.lobbyChange,  () => this.node!.myPeers.size == 0 && this.setStateWait({peers: [...this.node!.lobbyPeers]})) // after meleft
-        // Go back to lobby if your room is empty when someone leaves
-        this.node.on(Events.meLeft,       () => this.setStateWait({peers: [...this.node!.myPeers], lobby: this.node!.myPeers.size == 0}))
-        this.node.on(Events.meJoin,       () => this.setState({    peers: [...this.node!.myPeers], lobby: false, canReadyUp: true}))
+        this.node.on(Events.lobbyChange, () => !this.node!.inGroup && this.setState({peers: [...this.node!.lobbyPeers]}))
+        this.node.on(Events.groupChange, () => this.setState({
+            peers:      [...this.node!.groupPeers],
+            hasGroup:   this.node!.inGroup,
+            canReadyUp: this.node!.isLeader,
+        }))
 
-        await this.node.connect() // temp work around. broken in 0.0.17
         await this.node.joinLobby()
 
-        this.setState({loading: false, online: true})
+        this.setState({
+            loading: true,
+            online: true,
+
+            // clean start
+            hasGroup: false,
+            canReadyUp: false,
+            peers: [],
+        })
     }
 
     /** Simple error handling, tell the parent and disconnect */
@@ -74,39 +79,38 @@ export default class Menu extends React.Component<Props, State> {
             this.node.disconnect()
     }
 
-    /** A delayed set state to wait for peer data to update before proccessing */
-    setStateWait = <K extends keyof State>(state: Pick<State, K>) => setTimeout(() => this.setState(state), 0)
-
     /** When the room host ready's up. */
     private onReady = () => {
         this.setState({loading: true})
 
         let takeSet: (player: number, set: [number, number, number]) => void
+
         const peerIndex: { [id: string]: number } = { [this.node!['id']]: 0 }
         const names = [ this.node!.name ]
 
-        for(const [peerId, name] of this.state.peers) {
+        for(const [peerId, name] of this.node!.groupPeers) {
             peerIndex[peerId] = names.length
             names.push(name)
         }
 
+        // Bind new listeners
         this.node!.removeAllListeners()
         this.node!.on(Events.error, this.error)
         this.node!.on(Events.disconnected, () => this.error(Error('Disconnected from network. Try Refreshing.')))
-        this.node!.on(Events.peerLeft, peerId => this.error(Error(`${this.node!.peers.get(peerId)} left the game`)))
+        this.node!.on(Events.groupLeft, peerId => this.error(Error(`${this.node!.getPeerName(peerId)} left the game`)))
 
         this.node!.on(Events.data, ({peer, data}) => {
             if (peerIndex[peer] != undefined && Array.isArray(data) && data.length == 3)
                 takeSet(peerIndex[peer], data as [number, number, number])
             else
-                this.error(Error(`Recieved unexpected data from ${this.node!.peers.get(peer)}.`), {data})
+                this.error(Error(`Recieved unexpected data from ${this.node!.getPeerName(peer)}.`), {data})
         })
 
         this.props.onReady({
             names,
             preventTakeAction: true,
             rng:           max => Math.abs(this.node!.random(true)) % max,
-            players:       1 + this.node!.peers.size,
+            players:       1 + this.node!.groupPeers.size,
             takeSet:       action => takeSet = action, // save the action to the outer scope
             onTakeAttempt: set => this.node!.broadcast(set),
         })
@@ -114,10 +118,10 @@ export default class Menu extends React.Component<Props, State> {
 
     private joinPlayer = async (peer: string) => {
         this.setState({loading: true})
-        await this.node!.joinPeer(peer)
+        await this.node!.joinGroup(peer)
         this.setState({
             loading: false,
-            lobby: false,
+            hasGroup: false,
             peers: [],
             canReadyUp: false,
         })
@@ -126,7 +130,7 @@ export default class Menu extends React.Component<Props, State> {
     render = () => this.state.online
         ? this.state.peers.length == 0 // Is connected to others
             ? <Loading size={64}>Searching for other players</Loading>
-            : this.state.lobby // Is in main lobby vs player's room
+            : !this.state.hasGroup // Is in main lobby vs player's room
                 ? // In the lobby, looking to connect or waiting
                 <Grid item container sm={6} md={4}>
                     <Paper style={{width: '100%'}}>

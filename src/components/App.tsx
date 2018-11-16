@@ -64,8 +64,16 @@ export default class App extends React.Component<Props, State> {
                     <DialogTitle>Aww man... An error has occured</DialogTitle>
                     <DialogContent>
                         <DialogContentText>{this.state.error.message}</DialogContentText>
-                        <pre style={{textAlign: 'left'}}>{this.state.error.stack}</pre>
-                        <pre style={{textAlign: 'left'}}>{JSON.stringify({...this.state.error}, null, 2)}</pre>
+                        <Typography
+                            variant="overline"
+                            align="left"
+                            style={{
+                                fontFamily: 'Consolas, "Liberation Mono", Menlo, monospace',
+                                whiteSpace: 'pre',
+                            }} >
+                            {this.state.error.stack}
+                            {JSON.stringify({...this.state.error}, null, 2)}
+                        </Typography>
                     </DialogContent>
                 </Dialog> }
 
