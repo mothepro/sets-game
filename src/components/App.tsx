@@ -1,7 +1,20 @@
 import * as React from 'react'
-import { MuiThemeProvider, createMuiTheme, Icon, IconButton, CssBaseline, Dialog, DialogTitle, DialogContent, DialogContentText, Grid, Typography } from '@material-ui/core'
 import Menu from './Menu'
+import Lobby from './Lobby'
 import GameUI, { Props as GameProps } from './Game'
+import {
+    MuiThemeProvider,
+	createMuiTheme,
+	Icon,
+	IconButton,
+	CssBaseline,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	Grid,
+    Typography,
+} from '@material-ui/core'
 
 interface Props {
     package: string
@@ -10,15 +23,19 @@ interface Props {
 interface State {
     lightTheme: boolean
     inGame: boolean
+    online: boolean
     error?: Error
 }
 
 export default class App extends React.Component<Props, State> {
 
     private gameProps?: GameProps
+    private name?: string
+
     readonly state: State = {
         lightTheme: true,
         inGame: false,
+        online: false,
     }
 
     private static darkTheme = createMuiTheme({
@@ -36,14 +53,23 @@ export default class App extends React.Component<Props, State> {
 
     private toggleTheme = () => this.setState({lightTheme: !this.state.lightTheme})
 
-    private goBack = () => this.setState({inGame: false})
+    private goBack = () => this.setState({inGame: false, online: false})
 
     private onError = (error: Error) => this.setState({error})
 
-    private onReady = (opts?: GameProps) => {
-        this.gameProps = opts
+    private startGame = (gameProps?: GameProps) => {
+        this.gameProps = gameProps
         this.setState({inGame: true})
     }
+
+    /** The player is ready to go online, take them to the lobby */
+    private handleOnline = (name: string) => {
+        if (!this.name) // don't overwrite name
+            this.name = name
+        this.setState({online: true})
+    }
+
+    private offline = () => this.setState({online: false})
 
     render = () =>
         <MuiThemeProvider theme={this.state.lightTheme ? App.lightTheme : App.darkTheme}>
@@ -57,7 +83,7 @@ export default class App extends React.Component<Props, State> {
                     <Icon fontSize="small">wb_incandescent</Icon>
             </IconButton>
 
-            {this.state.inGame &&
+            {(this.state.inGame || this.state.online) &&
                 <IconButton onClick={this.goBack} style={{
                         position: 'absolute',
                         left:     App.lightTheme.spacing.unit,
@@ -92,10 +118,16 @@ export default class App extends React.Component<Props, State> {
                     </Typography>
                 </Grid>
                 { this.state.inGame
-                        ? <GameUI {...this.gameProps} />
-                        : <Menu package={this.props.package}
-                                onError={this.onError}
-                                onReady={this.onReady} /> }
+                    ? <GameUI {...this.gameProps} />
+                    : !this.state.online
+                        ? <Menu name={this.name}
+                                onStart={this.startGame}
+                                onOnline={this.handleOnline} />
+                        : <Lobby package={this.props.package}
+                                 onError={this.onError}
+                                 name={this.name!}
+                                 onStart={this.startGame}
+                                 onDisconnect={this.offline} /> }
             </Grid>
         </MuiThemeProvider>
 }
