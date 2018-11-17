@@ -1,7 +1,7 @@
-.idea/
-node_modules/
-dist/*
+.idea
+node_modules
+dist
+bin
 npm-debug.log
-
-# We need these in the repo for github pages.
-!dist/bundle.js
+package-lock.json
+.DS_Store

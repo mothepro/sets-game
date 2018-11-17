@@ -1,24 +1,35 @@
 {
   "name": "sets-game",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "clean": "if exist dist rmdir /s /q dist && mkdir dist",
-    "build": "npm run clean && npm run build:work",
-    "web": "npm run build && npm run web:work",
-    "build:work": "tsc",
-    "web:work": "browserify dist/index.js -o dist/bundle.js"
+    "start": "webpack-dev-server --mode development",
+    "dev": "webpack",
+    "prod": "webpack -p",
+    "predeploy": "npm run prod",
+    "deploy": "gh-pages -d bin"
   },
   "dependencies": {
-    "ipfs-pubsub-room": "^1.4.0",
+    "@material-ui/core": "^3.4.0",
+    "p2p-lobby": "^0.1.0",
+    "react": "^16.6.1",
+    "react-dom": "^16.6.1",
     "sets-game-engine": "git://github.com/mothepro/sets-game-engine.git"
   },
   "devDependencies": {
+    "@material-ui/icons": "^3.0.1",
     "@types/node": "^10.11.3",
-    "browserify": "^16.2.3",
-    "ipfs": "^0.32.3",
-    "mocha": "^5.2.0",
-    "should": "^13.2.3",
+    "@types/react": "^16.7.0",
+    "@types/react-dom": "^16.0.9",
+    "gh-pages": "^2.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-template": "^6.2.0",
+    "source-map-loader": "^0.2.4",
     "strict-event-emitter-types": "^2.0.0",
-    "typescript": "^3.1.1"
+    "ts-loader": "^5.3.0",
+    "typescript": "^3.1.1",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-dev-server": "^3.1.10"
   }
 }

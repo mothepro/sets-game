@@ -7,9 +7,12 @@
     "outDir": "dist/",
     "declaration": true,
     "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "jsx": "react",
     "lib": ["esnext", "dom"]
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist/"
   ]
 }
