@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Player, Game, Card, Events } from 'sets-game-engine'
-import { Grid, Button, Icon, Typography, CircularProgress, Paper, List, ListItem, ListItemText } from '@material-ui/core'
+import { Grid, Button, Icon, Typography, Paper, List, ListItem, ListItemText } from '@material-ui/core'
 import Clock from './Clock'
 import CardUI from './Card'
 import Loading from './Loading';
@@ -20,6 +20,9 @@ export interface Props {
 
     // If true, will not take set when button is pressed
     preventTakeAction: boolean
+
+    // How long the user should be banned. (Don't provide to disbale banning)
+    nextTimeout?: (oldTimeout: number) => number
 
     // Called when the main player trys to take a set
     onTakeAttempt?: (selected: SetIndexs) => void
@@ -44,15 +47,11 @@ interface State {
 
 export default class GameUI extends React.Component<Props, State> {
 
-    private readonly game = new Game({
-        rng: this.props.rng,
-        shoe: 2,
-        timeout: 5 * 1000, // ban for 5 seconds by default
-        nextTimeout: (oldTimeout: number) => oldTimeout + 5 * 1000 // increase ban individually
-    })
-    private readonly players: Player[] = []
-    private mainPlayer?: Player // will be known at mount time
     private banHandles: WeakMap<Player, number> = new WeakMap
+
+    // will be known at mount time
+    private game!: Game
+    private readonly players: Player[] = []
 
     readonly state: State = {
         cards: [],
@@ -68,22 +67,28 @@ export default class GameUI extends React.Component<Props, State> {
         preventTakeAction: false,
         names: [],
         rng: (max: number) => Math.floor(Math.random() * max),
+        nextTimeout: (oldTimeout: number) => oldTimeout == 0
+            ? 5 * 1000              // ban for 5 seconds by default
+            : oldTimeout + 5 * 1000 // increase ban individually TODO, disable in solo mode
     }
 
     componentWillUnmount = () => this.game.removeAllListeners()
 
     componentDidMount() {
+        // Make the game here in case our RNG method switches
+        this.game = new Game({
+            rng: this.props.rng,
+            nextTimeout: this.props.nextTimeout,
+        })
+        this.players.length = 0 // clear player list
+
         for(let i = 0; i < this.props.players; i++) {
             let player = new Player
             this.players.push(player)
             this.game.addPlayer(player)
         }
 
-        this.game.on(Events.start, () => {
-            if (this.props.takeSet)
-                this.props.takeSet(this.takeSet)
-            this.mainPlayer = this.players[0]
-        })
+        this.game.on(Events.start,          () => this.props.takeSet && this.props.takeSet(this.takeSet))
         this.game.on(Events.playerBanned,   this.onBan)
         this.game.on(Events.playerUnbanned, this.onUnban)
         this.game.on(Events.marketFilled,   () => this.setState({cards: [...this.game.playableCards]}))
@@ -94,7 +99,10 @@ export default class GameUI extends React.Component<Props, State> {
     }
 
     /** Action to take a set from the deck for a player */
-    takeSet = (player: index, set: SetIndexs) => this.players[player].takeSet(...set)
+    takeSet = (player: index, set: SetIndexs) => {
+        this.setState({selected: []})
+        return this.players[player].takeSet(...set)
+    }
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
@@ -102,7 +110,6 @@ export default class GameUI extends React.Component<Props, State> {
             this.props.onTakeAttempt(this.state.selected as SetIndexs)
         if (!this.props.preventTakeAction)
             this.takeSet(0, this.state.selected as SetIndexs)
-        this.setState({selected: []})
     }
 
     /** Main player toggles a card */
@@ -148,10 +155,8 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({bans})
     }
 
-    render = () => !this.mainPlayer ? <Loading size={64} /> : // Waiting for game to start
-        this.state.finished ? // Game is finished. Show the winners
-            <Typography>All done. <pre>{JSON.stringify(this.game.winners, null, 2)}</pre></Typography>
-        : <>
+    render = () => !this.state.finished
+        ? <>
             {this.state.cards.map((card, i) =>
                 <CardUI
                     key={i}
@@ -209,4 +214,10 @@ export default class GameUI extends React.Component<Props, State> {
                 </Grid>
             </Grid>
         </>
+        : // TODO Show winners once game is finished.
+        <Typography>
+            All done.
+            <pre>{JSON.stringify(this.game.winners, null, 2)}</pre>
+        </Typography>
+
 }
