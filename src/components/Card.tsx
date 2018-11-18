@@ -41,7 +41,7 @@ const CardUI = ({card, selected, toggle, width}: Props) =>
     <Grid item container sm={4} xs={6} justify="center">
         <MaterialCard
             onClick={toggle}
-            raised={selected}
+            elevation={selected ? 24 : 2}
             style={{
                 width:    '100%',
                 maxWidth: '20em',
@@ -49,12 +49,15 @@ const CardUI = ({card, selected, toggle, width}: Props) =>
                 padding: '1.5em 0 1em'
             }}
         >
-            <CardContent style={{height: '100%', padding: isWidthDown('xs', width) ? 0 : undefined}}>
+            <CardContent style={{height: '100%', padding: isWidthDown('xs', width) ? 5 : undefined}}>
                 {[...Array(1 + card.quantity)].map((_, i) => {
                     const Shape = SHAPES[card.shape]
                     return <Shape
                         key={i}
-                        size={1 + +isWidthUp('sm', width) + +isWidthUp('md', width)}
+                        size={1 +
+                            +isWidthUp('sm', width) +
+                            +isWidthUp('md', width) +
+                            +isWidthUp('lg', width)}
                         color={COLORS[card.color]}
                         opacity={card.opacity / 2}
                     /> })}
