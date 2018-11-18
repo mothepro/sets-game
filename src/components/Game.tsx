@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Player, Game, Card, Events } from 'sets-game-engine'
-import { Grid, Button, Icon, Typography, Paper, List, ListItem, ListItemText } from '@material-ui/core'
+import { Grid, Button, Icon, Typography, Paper, List, ListItem, ListItemText, Zoom } from '@material-ui/core'
 import Clock from './Clock'
 import CardUI from './Card'
 import Loading from './Loading';
@@ -38,7 +38,10 @@ export interface Props {
 }
 
 interface State {
-    cards: ReadonlyArray<Card>
+    cards: {
+        card: Card
+        enter: number // 0, means to remove
+    }[]
     selected: index[] // indexs of the cards in state
     bans: { [playerIndex: number]: number } // how far the player has progressed on their ban
     scores: number[]
@@ -52,6 +55,8 @@ export default class GameUI extends React.Component<Props, State> {
     // will be known at mount time
     private game!: Game
     private readonly players: Player[] = []
+    private start?: Date
+    private end?: Date
 
     readonly state: State = {
         cards: [],
@@ -88,18 +93,18 @@ export default class GameUI extends React.Component<Props, State> {
             this.game.addPlayer(player)
         }
 
-        this.game.on(Events.start,          () => this.props.takeSet && this.props.takeSet(this.takeSet))
-        this.game.on(Events.playerBanned,   this.onBan)
+        this.game.on(Events.start, this.onStart)
+        this.game.on(Events.finish, this.onFinish)
+        this.game.on(Events.playerBanned, this.onBan)
         this.game.on(Events.playerUnbanned, this.onUnban)
-        this.game.on(Events.marketFilled,   () => this.setState({cards: [...this.game.playableCards]}))
-        this.game.on(Events.marketGrab,     () => this.setState({scores: this.players.map(player => player.score)}))
-        this.game.on(Events.finish,         () => this.setState({finished: true}))
+        this.game.on(Events.marketGrab, this.onGrab)
+        this.game.on(Events.marketFilled, this.onFill)
 
         this.game.start()
     }
 
     /** Action to take a set from the deck for a player */
-    takeSet = (player: index, set: SetIndexs) => {
+    private takeSet = (player: index, set: SetIndexs) => {
         this.setState({selected: []})
         return this.players[player].takeSet(...set)
     }
@@ -124,7 +129,17 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({selected})
     }
 
-    /** When any player is banned */
+    private onStart = () => {
+        this.start = new Date
+        if (this.props.takeSet)
+            this.props.takeSet(this.takeSet)
+    }
+
+    private onFinish = () => {
+        this.end = new Date
+        this.setState({finished: true})
+    }
+
     private onBan = ({player, timeout} : {player: Player, timeout: number}) => {
         // clear original timer if they are somehow banned already
         if (this.banHandles.has(player))
@@ -145,7 +160,6 @@ export default class GameUI extends React.Component<Props, State> {
         )
     }
 
-    /** When any player is unbanned */
     private onUnban = (player: Player) => {
         const index = this.players.indexOf(player)
         const { bans } = this.state
@@ -155,15 +169,45 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({bans})
     }
 
+    /** Add card to state and animate it in order. */
+    private onGrab = (removedSet: [Card, Card, Card]) =>
+        this.setState({
+            scores: this.players.map(player => player.score),
+            cards: this.state.cards.map(({card, enter}) => ({
+                    card,
+                    // leave `enter` the same. But if the card is in `removedSet` set to 0.
+                    enter: enter * +!removedSet.includes(card),
+                })),
+        })
+
+    /** Remove cards in place, and animate new cards in order. */
+    private onFill = () => {
+        let count = 1
+        const refillCards = () =>
+            this.setState({
+                cards: this.game.playableCards.map(card => ({card, enter: count++}))
+            })
+
+        if (this.state.cards.length) // wait for old cards to leave
+            setTimeout(refillCards, 250)
+        else
+            refillCards()
+    }
+
     render = () => !this.state.finished
         ? <>
-            {this.state.cards.map((card, i) =>
-                <CardUI
-                    key={i}
-                    card={card}
-                    selected={this.state.selected.includes(i)}
-                    toggle={() => this.toggleCard(i)}
-                /> )}
+            {this.state.cards.map(({card, enter}, i) =>
+                <Zoom
+                    key={card.encoding}
+                    in={!!enter}
+                    style={{transitionDelay: enter ? `${(enter - 1)* 250}ms` : undefined}} >
+                    <Grid item container sm={4} xs={6} justify="center">
+                        <CardUI
+                            card={card}
+                            selected={this.state.selected.includes(i)}
+                            toggle={() => this.toggleCard(i)} />
+                    </Grid>
+                </Zoom> )}
             <Grid container style={{marginTop: '2em'}} justify="space-around" spacing={24}>
                 <Grid item sm xs={12}>
                     <Button
@@ -176,7 +220,7 @@ export default class GameUI extends React.Component<Props, State> {
                     >
                         <Icon style={{margin: '.5em 1em .5em 0'}}>done_outline</Icon>
                         Take Set
-                        {this.state.bans[0] && // main player is banned
+                        {this.state.bans[0] &&
                             <Loading
                                 variant="determinate"
                                 color="secondary"
@@ -197,7 +241,9 @@ export default class GameUI extends React.Component<Props, State> {
                                 {this.props.names.map((name, index) =>
                                     <ListItem key={index} disabled={!!this.state.bans[index]}>
                                         <ListItemText>
-                                            <Typography variant="overline" style={{float: 'right'}}>{this.state.scores[index]}</Typography>
+                                            <Typography variant="overline" style={{float: 'right'}}>
+                                                {this.state.scores[index]} // ripple?
+                                            </Typography>
                                             {name}
                                         </ListItemText>
                                         {this.state.bans[index] && // player is banned
@@ -215,9 +261,9 @@ export default class GameUI extends React.Component<Props, State> {
             </Grid>
         </>
         : // TODO Show winners once game is finished.
-        <Typography>
+        <Typography variant="overline">
             All done.
-            <pre>{JSON.stringify(this.game.winners, null, 2)}</pre>
+            {JSON.stringify(this.game.winners, null, 2)}
         </Typography>
 
 }
