@@ -51,12 +51,6 @@ export default class App extends React.Component<Props, State> {
         return error
     }
 
-    private toggleTheme = () => this.setState({lightTheme: !this.state.lightTheme})
-
-    private goBack = () => this.setState({inGame: false, online: false})
-
-    private onError = (error: Error) => this.setState({error})
-
     private startGame = (gameProps?: GameProps) => {
         this.gameProps = gameProps
         this.setState({inGame: true})
@@ -69,7 +63,15 @@ export default class App extends React.Component<Props, State> {
         this.setState({online: true})
     }
 
-    private offline = () => this.setState({online: false})
+    private toggleTheme = () => this.setState({lightTheme: !this.state.lightTheme})
+
+    private goBack = () => this.setState({inGame: false, online: false})
+
+    private goOffline = () => this.setState({online: false})
+
+    private onError = (error: Error) => this.setState({error})
+
+    private removeError = () => this.setState({error: undefined})
 
     render = () =>
         <MuiThemeProvider theme={this.state.lightTheme ? App.lightTheme : App.darkTheme}>
@@ -93,7 +95,7 @@ export default class App extends React.Component<Props, State> {
                 </IconButton> }
 
             {this.state.error &&
-                <Dialog open>
+                <Dialog open onClose={this.removeError}>
                     <DialogTitle>Oh no... An error has occured</DialogTitle>
                     <DialogContent>
                         <DialogContentText>{this.state.error.message}</DialogContentText>
@@ -119,15 +121,15 @@ export default class App extends React.Component<Props, State> {
                 </Grid>
                 { this.state.inGame
                     ? <GameUI {...this.gameProps} />
-                    : !this.state.online
-                        ? <Menu name={this.name}
+                    : this.state.online
+                        ? <Lobby package={this.props.package}
+                                onError={this.onError}
+                                name={this.name!}
                                 onStart={this.startGame}
-                                onOnline={this.handleOnline} />
-                        : <Lobby package={this.props.package}
-                                 onError={this.onError}
-                                 name={this.name!}
-                                 onStart={this.startGame}
-                                 onDisconnect={this.offline} /> }
+                                onDisconnect={this.goOffline} />
+                        : <Menu name={this.name}
+                                onStart={this.startGame}
+                                onOnline={this.handleOnline} /> }
             </Grid>
         </MuiThemeProvider>
 }
