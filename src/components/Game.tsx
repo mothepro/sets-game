@@ -72,9 +72,6 @@ export default class GameUI extends React.Component<Props, State> {
         preventTakeAction: false,
         names: [],
         rng: (max: number) => Math.floor(Math.random() * max),
-        nextTimeout: (oldTimeout: number) => oldTimeout == 0
-            ? 5 * 1000              // ban for 5 seconds by default
-            : oldTimeout + 5 * 1000 // increase ban individually TODO, disable in solo mode
     }
 
     componentWillUnmount = () => this.game.removeAllListeners()

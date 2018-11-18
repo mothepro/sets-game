@@ -128,6 +128,9 @@ export default class Lobby extends React.PureComponent<Props, State> {
             players:       1 + node!.groupPeers.size,
             takeSet:       action => takeSet = action, // save the action to the outer scope
             onTakeAttempt: set => node!.broadcast(set),
+            nextTimeout: (oldTimeout: number) => oldTimeout == 0
+                ? 5 * 1000              // ban for 5 seconds by default
+                : oldTimeout + 5 * 1000 // increase ban individually
         })
     }
 
