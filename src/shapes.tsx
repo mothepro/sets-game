@@ -13,7 +13,6 @@ interface Props {
     color: Color
     classes: {
         shape: string
-        triangle: string
     }
 }
 
@@ -22,20 +21,12 @@ const styles = ({palette}: Theme) => createStyles({
         margin: '0 .5em',
         display: 'inline-block',
         borderStyle: 'solid',
-
-        overflow: 'hidden',
-    },
-    triangle: {
-        display: 'inline-block',
-        margin: '0 .5em',
-        borderStyle: 'solid',
-
-        width: 0,
         borderColor: 'transparent',
         position: 'relative',
+        width: 0,
         '& span': {
-            position: 'absolute',
             width: 0,
+            position: 'absolute',
             borderStyle: 'solid',
             borderColor: 'transparent',
             borderBottomColor: palette.background.paper,
@@ -50,7 +41,7 @@ const TriangleComponent = ({size, color, opacity, classes}: Props) => {
     const borderWidth  = size / 6,
           baseByHeight = Math.sqrt(3) / 3 // Equilateral triangle. Thanks Amima :)
 
-    return <div className={classes.triangle} style={{
+    return <div className={classes.shape} style={{
                 borderBottomColor: formatColor(color),
                 borderBottomWidth: `${size}em`,
                 borderRightWidth:  `${size * baseByHeight}em`,

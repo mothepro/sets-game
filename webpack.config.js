@@ -60,7 +60,7 @@ if (!isProduction)
 module.exports = {
     mode: 'development',
     entry: {
-        app: [ './src/index.tsx' ],
+        app: [ './index.tsx' ],
     },
     externals: {
         'react': 'React',

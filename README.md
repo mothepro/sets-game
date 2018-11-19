@@ -4,7 +4,8 @@
 + Animation at the end screen
 + How to play button
 + Show ban timer over score
-+ Highlighting cards in dark mod
++ Highlighting cards in dark mode
++ Use classes over CSS styles
 + Groups displayed in lobby properly
     + Extract to it's own resuable component?
 + A button to get hints
