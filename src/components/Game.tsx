@@ -1,9 +1,19 @@
 import * as React from 'react'
-import { Player, Game, Card, Events } from 'sets-game-engine'
-import { Grid, Button, Icon, Typography, Paper, List, ListItem, ListItemText, Zoom } from '@material-ui/core'
 import Clock from './Clock'
 import CardUI from './Card'
-import Loading from './Loading';
+import Loading from './Loading'
+import { Player, Game, Card, Events } from 'sets-game-engine'
+import {
+    Grid,
+    Button,
+    Icon,
+    Typography,
+    Paper,
+    List,
+    ListItem,
+    ListItemText,
+    Zoom,
+} from '@material-ui/core'
 
 type index = number
 export type SetIndexs = [index, index, index]
@@ -182,7 +192,12 @@ export default class GameUI extends React.Component<Props, State> {
         let count = 1
         const refillCards = () =>
             this.setState({
-                cards: this.game.playableCards.map(card => ({card, enter: count++}))
+                cards: this.game.playableCards.map((card, index) => ({
+                    card,
+                    enter: this.state.cards[index] && this.state.cards[index].enter
+                        ? this.state.cards[index].enter
+                        : count++
+                }))
             })
 
         if (this.state.cards.length) // wait for old cards to leave
@@ -239,7 +254,7 @@ export default class GameUI extends React.Component<Props, State> {
                                     <ListItem key={index} disabled={!!this.state.bans[index]}>
                                         <ListItemText>
                                             <Typography variant="overline" style={{float: 'right'}}>
-                                                {this.state.scores[index]} // ripple?
+                                                {this.state.scores[index]}
                                             </Typography>
                                             {name}
                                         </ListItemText>

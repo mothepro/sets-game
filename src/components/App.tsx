@@ -96,7 +96,7 @@ export default class App extends React.Component<Props, State> {
 
             {this.state.error &&
                 <Dialog open onClose={this.removeError}>
-                    <DialogTitle>Oh no... An error has occured</DialogTitle>
+                    <DialogTitle>Oh No!</DialogTitle>
                     <DialogContent>
                         <DialogContentText>{this.state.error.message}</DialogContentText>
                         <Typography
@@ -105,6 +105,7 @@ export default class App extends React.Component<Props, State> {
                             style={{
                                 fontFamily: 'Consolas, "Liberation Mono", Menlo, monospace',
                                 whiteSpace: 'pre',
+                                display: 'none', // must go looking for this
                             }} >
                             {this.state.error.stack}
                             {JSON.stringify({...this.state.error}, null, 2)}
