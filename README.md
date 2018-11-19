@@ -6,17 +6,17 @@
 + Show ban timer over score
 + Highlighting cards in dark mod
 + Groups displayed in lobby properly
- + Extract to it's own resuable component?
+    + Extract to it's own resuable component?
 + A button to get hints
 + Settings before starting game
- + Send additional data on ready up
+    + Send additional data on ready up
 + Keyboard navigation
 + Better accessability
- + Colorblind friendly colors
- + aria-labels + keyboard (html form?)
+    + Colorblind friendly colors
+    + aria-labels + keyboard (html form?)
 + Google analytics & Ads
 + Offline support (manifest.json)
- + Only load p2p library when going online
+    + Only load p2p library when going online
 
 ## [Source Code](https://github.com/mothepro/sets-game)
 
