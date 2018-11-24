@@ -13,21 +13,28 @@ interface Props extends WithStyles<typeof styles> {
     color: Color
 }
 
-const styles = ({palette, spacing}: Theme) => createStyles({
+const styles = ({palette, spacing, shape}: Theme) => createStyles({
     shape: {
-        marginLeft: spacing.unit * 2,
-        marginRight: spacing.unit * 2,
+        marginLeft: spacing.unit,
+        marginRight: spacing.unit,
         display: 'inline-block',
         borderStyle: 'solid',
         borderColor: 'transparent',
-        position: 'relative',
-        width: 0,
-        '& span': { // for triangles
+        '&.square': {
+            borderRadius: shape.borderRadius,
+        },
+        '&.circle': {
+            borderRadius: '50%',
+        },
+        '&.triangle': {
+            position: 'relative',
             width: 0,
-            position: 'absolute',
-            borderStyle: 'solid',
-            borderColor: 'transparent',
-            borderBottomColor: palette.background.paper,
+            '& span': {
+                position: 'absolute',
+                borderStyle: 'solid',
+                borderColor: 'transparent',
+                borderBottomColor: palette.background.paper,
+            },
         },
     },
 })
@@ -39,7 +46,7 @@ const formatColor = ({hue, saturation, lightness}: Color, opacity = 1) =>
     `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
 const TriangleComponent = ({size, color, opacity, classes}: Props) =>
-    <div className={classes.shape} style={{
+    <div className={'triangle ' + classes.shape} style={{
                 borderBottomColor: formatColor(color),
                 borderBottomWidth: `${size}em`,
                 borderRightWidth:  `${size * baseByHeight}em`,
@@ -55,29 +62,17 @@ const TriangleComponent = ({size, color, opacity, classes}: Props) =>
         }} />
     </div>
 
-const SquareComponent = ({size, color, opacity, classes}: Props) =>
-    <div className={classes.shape} style={{
-        width:          `${size}em`,
-        height:         `${size}em`,
-        borderWidth:    `${size / 6}em`,
-        borderColor:     formatColor(color),
-        backgroundColor: formatColor(color, opacity),
-
-        borderRadius: '0.1em',
-    }} />
-
-const CircleComponent = ({size, color, opacity, classes}: Props) =>
-    <div className={classes.shape} style={{
-        width:          `${size}em`,
-        height:         `${size}em`,
-        borderWidth:    `${size / 6}em`,
-        borderColor:     formatColor(color),
-        backgroundColor: formatColor(color, opacity),
-
-        borderRadius: '50%',
-    }} />
+const Shape = (type: 'square' | 'circle') =>
+    ({size, color, opacity, classes}: Props) =>
+        <div className={`${type} ${classes.shape}`} style={{
+            width:          `${size}em`,
+            height:         `${size}em`,
+            borderWidth:    `${size / 6}em`,
+            borderColor:     formatColor(color),
+            backgroundColor: formatColor(color, opacity),
+        }} />
 
 export const
-    Circle = withStyles(styles)(CircleComponent),
-    Square = withStyles(styles)(SquareComponent),
+    Circle = withStyles(styles)(Shape('circle')),
+    Square = withStyles(styles)(Shape('square')),
     Triangle = withStyles(styles)(TriangleComponent)
