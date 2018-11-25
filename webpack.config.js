@@ -1,12 +1,11 @@
+const title = 'Sets the Game'
+
+const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-
-const title = 'Sets the Game'
-
-const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 
 const scripts = isProduction
     ? [ // Production CDN links
@@ -61,7 +60,7 @@ const plugins = [
         name: title,
         short_name: 'Sets',
         description: 'The Card Game Sets by Mo',
-        background_color: 'transparent',
+        background_color: '#ffffff',
         theme_color: '#ffffff',
         crossorigin: 'anonymous',
         icons: [{

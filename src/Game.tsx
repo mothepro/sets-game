@@ -13,6 +13,7 @@ import {
     ListItem,
     ListItemText,
     Zoom,
+    IconButton,
 } from '@material-ui/core'
 
 type index = number
@@ -53,6 +54,7 @@ interface State {
         enter: number // 0, means to remove
     }[]
     selected: index[] // indexs of the cards in state
+    hints: index[]
     bans: { [playerIndex: number]: number } // how far the player has progressed on their ban
     scores: number[]
     finished: boolean
@@ -71,6 +73,7 @@ export default class GameUI extends React.Component<Props, State> {
     readonly state: State = {
         cards: [],
         selected: [],
+        hints: [],
         bans: {},
         scores: (new Array(this.props.players)).fill(0),
         finished: false,
@@ -112,7 +115,10 @@ export default class GameUI extends React.Component<Props, State> {
 
     /** Action to take a set from the deck for a player */
     private takeSet = (player: index, set: SetIndexs) => {
-        this.setState({selected: []})
+        this.setState({
+            selected: [],
+            hints: [],
+        })
         return this.players[player].takeSet(...set)
     }
 
@@ -206,9 +212,20 @@ export default class GameUI extends React.Component<Props, State> {
             refillCards()
     }
 
+    private giveHint = () => {
+        const ungivenHints = this.game.hint().filter(index => !this.state.hints.includes(index))
+        if (ungivenHints.length) // still have hints to give
+            this.setState({
+                hints: [
+                    ...this.state.hints,
+                    ungivenHints[Math.floor(Math.random() * ungivenHints.length)],
+                ],
+            })
+    }
+
     render = () => !this.state.finished
         ? <>
-            {this.state.cards.map(({card, enter}, i) =>
+            {this.state.cards.map(({card, enter}, index) =>
                 <Zoom
                     key={card.encoding}
                     in={!!enter}
@@ -216,8 +233,9 @@ export default class GameUI extends React.Component<Props, State> {
                     <Grid item container sm={4} xs={6} justify="center">
                         <CardUI
                             card={card}
-                            selected={this.state.selected.includes(i)}
-                            toggle={() => this.toggleCard(i)} />
+                            selected={this.state.selected.includes(index)}
+                            hint={this.state.hints.includes(index)}
+                            toggle={() => this.toggleCard(index)} />
                     </Grid>
                 </Zoom> )}
             <Grid container style={{marginTop: '2em'}} justify="space-around" spacing={24}>
@@ -268,6 +286,9 @@ export default class GameUI extends React.Component<Props, State> {
                         </Paper> }
                 </Grid>
                 <Grid item sm>
+                    <IconButton onClick={this.giveHint}>
+                        <Icon>help_outline</Icon>
+                    </IconButton>
                     <Clock />
                 </Grid>
             </Grid>

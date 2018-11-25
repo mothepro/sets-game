@@ -1,15 +1,14 @@
 import * as React from 'react'
 import { Circle, Square, Triangle } from './shapes'
 import { Card, Details } from 'sets-game-engine'
-import { Card as MaterialCard, CardContent, withWidth } from '@material-ui/core'
-import { isWidthUp, isWidthDown } from '@material-ui/core/withWidth'
-import { Breakpoint } from '@material-ui/core/styles/createBreakpoints'
+import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme } from '@material-ui/core'
+import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
 
-interface Props {
+interface Props extends WithStyles<typeof styles>, WithWidth {
     card: Card
     selected: boolean
     toggle?: () => void
-    width: Breakpoint
+    hint?: boolean
 }
 
 const SHAPES = {
@@ -18,7 +17,10 @@ const SHAPES = {
     [Details.Shape.CIRCLE]:   Circle,
 }
 
-/** HSL for some nice material colors */
+/**
+ * HSL for some nice material colors
+ * TODO: make easy to see for colorblind
+ */
 const COLORS = {
     [Details.Color.BLUE]: {
         hue: 207,
@@ -37,32 +39,40 @@ const COLORS = {
     },
 }
 
-const CardUI = ({card, selected, toggle, width}: Props) =>
-    <MaterialCard
-        onClick={toggle}
-        elevation={selected ? 24 : 2} // Slowly increment for nice animation
-        style={{
-            width:    '100%',
-            maxWidth: '20em',
-            cursor:  'pointer',
-            padding: '1.5em 0 1em'
-        }} >
-        <CardContent style={{
-            height: '100%',
-            padding: isWidthDown('xs', width) ? 5 : undefined
-        }}>
-            {[...Array(1 + card.quantity)].map((_, i) => {
-                const Shape = SHAPES[card.shape]
-                return <Shape
-                    key={i}
-                    size={1 +
-                        +isWidthUp('sm', width) +
-                        +isWidthUp('md', width) +
-                        +isWidthUp('lg', width)}
-                    color={COLORS[card.color]}
-                    opacity={card.opacity / 2}
-                /> })}
-        </CardContent>
-    </MaterialCard>
+const styles = ({spacing}: Theme) => createStyles({
+    card: {
+        position: 'relative',
+        width: '100%',
+        maxWidth: '20em',
+        cursor: 'pointer',
+        paddingTop: spacing.unit * 4,
+        paddingBottom: spacing.unit * 4,
+    },
+    hint: {
+        position: 'absolute',
+        top: spacing.unit,
+        right: spacing.unit,
+        color: colors.yellow[500],
+    },
+})
 
-export default withWidth()(CardUI)
+const CardUI = ({card, selected, toggle, hint = false, width, classes}: Props) =>
+    <Paper
+        onClick={toggle}
+        elevation={selected ? 24 : 2} // Slowly increment for nice animation?
+        className={classes.card} >
+        {hint && <Icon className={classes.hint}>star</Icon>}
+        {[...Array(1 + card.quantity)].map((_, i) => {
+            const Shape = SHAPES[card.shape]
+            return <Shape
+                key={i}
+                size={1 +
+                    +isWidthUp('sm', width) +
+                    +isWidthUp('md', width) +
+                    +isWidthUp('lg', width)}
+                color={COLORS[card.color]}
+                opacity={card.opacity / 2}
+            /> })}
+    </Paper>
+
+export default withStyles(styles)(withWidth()(CardUI))
