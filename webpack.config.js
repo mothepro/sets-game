@@ -2,6 +2,7 @@ const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 const title = 'Sets the Game'
 
@@ -69,6 +70,9 @@ const plugins = [
         }]
     }),
 ]
+
+if (isProduction)
+    plugins.unshift(new CleanWebpackPlugin(['bin']))
 
 if (!isProduction)
     plugins.push(new HotModuleReplacementPlugin())
