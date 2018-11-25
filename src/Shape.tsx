@@ -21,6 +21,8 @@ const styles = ({palette, spacing, shape}: Theme) => createStyles({
         display: 'inline-block',
         borderStyle: 'solid',
         borderColor: 'transparent',
+        borderWidth: 0,
+
         '&.square': {
             borderRadius: shape.borderRadius,
         },
@@ -30,6 +32,8 @@ const styles = ({palette, spacing, shape}: Theme) => createStyles({
         '&.triangle': {
             position: 'relative',
             width: 0,
+            height: 0,
+            
             '& span': {
                 position: 'absolute',
                 borderStyle: 'solid',

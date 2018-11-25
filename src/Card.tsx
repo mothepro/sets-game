@@ -41,6 +41,7 @@ const styles = ({spacing}: Theme) => createStyles({
         cursor: 'pointer',
         paddingTop: spacing.unit * 4,
         paddingBottom: spacing.unit * 4,
+        transition: 'box-shadow 250ms',
     },
     hint: {
         position: 'absolute',
@@ -53,24 +54,25 @@ const styles = ({spacing}: Theme) => createStyles({
 const CardUI = ({card, selected, toggle, hint = false, width, classes}: Props) =>
     <Paper
         onClick={toggle}
-        elevation={selected ? 24 : 2} // Slowly increment for nice animation?
-        className={classes.card} >
+        elevation={selected ? 24 : 2}
+        className={classes.card}
+    >
         {hint && <Icon className={classes.hint}>star</Icon> /* Annie's idea */}
         {[...Array(1 + card.quantity)].map((_, i) => 
             <Shape
                 key={i}
-                type={card.shape == Details.Shape.CIRCLE
-                    ? 'circle'
-                    : card.shape == Details.Shape.TRIANGLE
-                        ? 'triangle'
-                        : 'square'}
                 color={COLORS[card.color]}
                 opacity={card.opacity / 2}
                 size={1 +
                     +isWidthUp('sm', width) +
                     +isWidthUp('md', width) +
-                    +isWidthUp('lg', width)} 
-        /> )}
+                    +isWidthUp('lg', width) }
+                type={card.shape == Details.Shape.CIRCLE
+                    ? 'circle'
+                    : card.shape == Details.Shape.TRIANGLE
+                        ? 'triangle'
+                        : 'square'}
+            /> )}
     </Paper>
 
 export default withStyles(styles)(withWidth()(CardUI))
