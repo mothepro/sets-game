@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Circle, Square, Triangle } from './shapes'
+import Shape from './Shape'
 import { Card, Details } from 'sets-game-engine'
 import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme } from '@material-ui/core'
 import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
@@ -9,12 +9,6 @@ interface Props extends WithStyles<typeof styles>, WithWidth {
     selected: boolean
     toggle?: () => void
     hint?: boolean
-}
-
-const SHAPES = {
-    [Details.Shape.TRIANGLE]: Triangle,
-    [Details.Shape.SQUARE]:   Square,
-    [Details.Shape.CIRCLE]:   Circle,
 }
 
 /**
@@ -61,18 +55,22 @@ const CardUI = ({card, selected, toggle, hint = false, width, classes}: Props) =
         onClick={toggle}
         elevation={selected ? 24 : 2} // Slowly increment for nice animation?
         className={classes.card} >
-        {hint && <Icon className={classes.hint}>star</Icon>}
-        {[...Array(1 + card.quantity)].map((_, i) => {
-            const Shape = SHAPES[card.shape]
-            return <Shape
+        {hint && <Icon className={classes.hint}>star</Icon> /* Annie's idea */}
+        {[...Array(1 + card.quantity)].map((_, i) => 
+            <Shape
                 key={i}
+                type={card.shape == Details.Shape.CIRCLE
+                    ? 'circle'
+                    : card.shape == Details.Shape.TRIANGLE
+                        ? 'triangle'
+                        : 'square'}
+                color={COLORS[card.color]}
+                opacity={card.opacity / 2}
                 size={1 +
                     +isWidthUp('sm', width) +
                     +isWidthUp('md', width) +
-                    +isWidthUp('lg', width)}
-                color={COLORS[card.color]}
-                opacity={card.opacity / 2}
-            /> })}
+                    +isWidthUp('lg', width)} 
+        /> )}
     </Paper>
 
 export default withStyles(styles)(withWidth()(CardUI))

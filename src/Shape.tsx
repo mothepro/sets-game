@@ -8,6 +8,7 @@ interface Color {
 }
 
 interface Props extends WithStyles<typeof styles> {
+    type: 'square' | 'circle' | 'triangle'
     size: number
     opacity: number
     color: Color
@@ -45,25 +46,24 @@ const baseByHeight = Math.sqrt(3) / 3
 const formatColor = ({hue, saturation, lightness}: Color, opacity = 1) =>
     `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
 
-const TriangleComponent = ({size, color, opacity, classes}: Props) =>
-    <div className={'triangle ' + classes.shape} style={{
-                borderBottomColor: formatColor(color),
-                borderBottomWidth: `${size}em`,
-                borderRightWidth:  `${size * baseByHeight}em`,
-                borderLeftWidth:   `${size * baseByHeight}em`,
-            }}>
-        <span style={{
-            opacity:           1 - opacity,
-            top:               `${size / 6}em`, // actual border width
-            left:              `${-(size - size / 3) * baseByHeight}em`,
-            borderBottomWidth: `${ (size - size / 3) }em`,
-            borderRightWidth:  `${ (size - size / 3) * baseByHeight}em`,
-            borderLeftWidth:   `${ (size - size / 3) * baseByHeight}em`,
-        }} />
-    </div>
-
-const Shape = (type: 'square' | 'circle') =>
-    ({size, color, opacity, classes}: Props) =>
+const Shape = ({type, size, color, opacity, classes}: Props) =>
+    type == 'triangle' ?
+        <div className={`${type} ${classes.shape}`} style={{
+            borderBottomColor: formatColor(color),
+            borderBottomWidth: `${size}em`,
+            borderRightWidth:  `${size * baseByHeight}em`,
+            borderLeftWidth:   `${size * baseByHeight}em`,
+        }}>
+            <span style={{
+                opacity:           1 - opacity,
+                top:               `${size / 6}em`, // actual border width
+                left:              `${-(size - size / 3) * baseByHeight}em`,
+                borderBottomWidth: `${ (size - size / 3) }em`,
+                borderRightWidth:  `${ (size - size / 3) * baseByHeight}em`,
+                borderLeftWidth:   `${ (size - size / 3) * baseByHeight}em`,
+            }} />
+        </div>
+    :
         <div className={`${type} ${classes.shape}`} style={{
             width:          `${size}em`,
             height:         `${size}em`,
@@ -72,7 +72,4 @@ const Shape = (type: 'square' | 'circle') =>
             backgroundColor: formatColor(color, opacity),
         }} />
 
-export const
-    Circle = withStyles(styles)(Shape('circle')),
-    Square = withStyles(styles)(Shape('square')),
-    Triangle = withStyles(styles)(TriangleComponent)
+export default withStyles(styles)(Shape)
