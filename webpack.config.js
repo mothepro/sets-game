@@ -1,6 +1,10 @@
 const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const WebpackPwaManifest = require('webpack-pwa-manifest')
+
+const title = 'Sets the Game'
+
 const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 
 const scripts = isProduction
@@ -29,7 +33,7 @@ const plugins = [
         inject: false,
         template: require('html-webpack-template'),
 
-        title: 'Sets the Game',
+        title,
         mobile: true,
         appMountId: 'app',
         lang: 'en',
@@ -51,6 +55,18 @@ const plugins = [
             collapseWhitespace: true,
             collapseBooleanAttributes: true,
         }
+    }),
+    new WebpackPwaManifest({
+        name: title,
+        short_name: 'Sets',
+        description: 'The Card Game Sets by Mo',
+        background_color: 'transparent',
+        theme_color: '#ffffff',
+        crossorigin: 'anonymous',
+        icons: [{
+            src: path.resolve('./Sets.png'),
+            sizes: [96, 128, 192, 256, 384, 512, 1024],
+        }]
     }),
 ]
 
@@ -77,17 +93,14 @@ module.exports = {
         extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
     },
     module: {
-        rules: [
-            {
-                test: /\.(ts|tsx)$/,
-                loader: 'ts-loader',
-            },
-            {
-                enforce: "pre",
-                test: /\.js$/,
-                loader: "source-map-loader",
-            },
-        ],
+        rules: [{
+            test: /\.(ts|tsx)$/,
+            loader: 'ts-loader',
+        }, {
+            enforce: "pre",
+            test: /\.js$/,
+            loader: "source-map-loader",
+        }],
     },
     plugins,
 }
