@@ -30,7 +30,7 @@ export default class Menu extends React.PureComponent<Props, State> {
     private handleGoSolo = () => this.props.onStart()
 
     render = () => <> 
-        <Grid item container justify="center" sm={6}>
+        <Grid item container justify="center" alignItems="center" sm={6}>
             <Button
                 variant="contained"
                 color="primary"

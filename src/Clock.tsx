@@ -49,7 +49,7 @@ export default class extends React.PureComponent<{}, State> {
             <IconButton onClick={!!this.state.handle ? this.handleHide : this.handleShow}>
                 <Icon>{!!this.state.handle ? 'timer_off' : 'timer'}</Icon>
             </IconButton>
-            {!!this.state.handle &&
+            {!!this.state.handle && // TODO: Show as tooltip
                 <Typography variant="overline" style={{fontSize: '2em'}} >
                     {dateDifference(this.state.start, this.state.current)}
                 </Typography> }

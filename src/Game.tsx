@@ -303,7 +303,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                     <Grid item container sm={4} xs={6} justify="center">
                         <ButtonBase
                             focusRipple
-                            component="button"
+                            component="div"
                             onClick={() => this.toggleCard(index)}
                             className={this.props.classes.card}
                          >
