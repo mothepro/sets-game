@@ -1,7 +1,7 @@
 import * as React from 'react'
 import Shape from './Shape'
 import { Card, Details } from 'sets-game-engine'
-import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme } from '@material-ui/core'
+import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme, Zoom } from '@material-ui/core'
 import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
 
 interface Props extends WithStyles<typeof styles>, WithWidth {
@@ -40,7 +40,7 @@ const styles = ({spacing}: Theme) => createStyles({
         paddingBottom: spacing.unit * 4,
         transition: 'box-shadow 250ms',
     },
-    hint: {
+    hint: { // Annie's Idea
         position: 'absolute',
         top: spacing.unit,
         right: spacing.unit,
@@ -50,8 +50,9 @@ const styles = ({spacing}: Theme) => createStyles({
 
 const CardUI = ({card, selected, hint = false, width, classes}: Props) =>
     <Paper className={classes.card} elevation={selected ? 24 : 2}>
-        {hint && // Annie's Idea
-            <Icon className={classes.hint}>star</Icon>}
+        <Zoom in={hint} timeout={1000}>
+            <Icon className={classes.hint}>star</Icon>
+        </Zoom>
         {[...Array(1 + card.quantity)].map((_, i) => 
             <Shape
                 key={i}

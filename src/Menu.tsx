@@ -37,7 +37,7 @@ export default class Menu extends React.PureComponent<Props, State> {
                 size="large"
                 onClick={this.handleGoSolo} >
                     <Icon style={{margin: '.5em 1em .5em 0'}}>person_outline</Icon>
-                    Play Solo
+                    Play
             </Button>
         </Grid>
         <Grid item container justify="center" sm={6}>
@@ -55,7 +55,7 @@ export default class Menu extends React.PureComponent<Props, State> {
                     }} />
                 <br/>
                 <Button
-                    disabled={this.state.name.trim().length < 2}
+                    disabled={!('p2p' in window) || this.state.name.trim().length < 2}
                     variant="contained"
                     color="primary"
                     size="large"
