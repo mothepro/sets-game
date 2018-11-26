@@ -15,6 +15,7 @@ import {
 	Grid,
     Typography,
 } from '@material-ui/core'
+import { Shadows } from '@material-ui/core/styles/shadows'
 
 interface Props {
     package: string
@@ -38,14 +39,21 @@ export default class App extends React.Component<Props, State> {
         online: false,
     }
 
-    private static darkTheme = createMuiTheme({
-            palette: { type: 'dark' },
-            typography: { useNextVariants: true },
-        })
     private static lightTheme = createMuiTheme({
-            palette: { type: 'light' },
-            typography: { useNextVariants: true },
-        })
+        palette: { type: 'light' },
+        typography: { useNextVariants: true },
+    })
+
+    private static darkTheme = createMuiTheme({
+        palette: { type: 'dark' },
+        typography: { useNextVariants: true },
+
+        // Convert the darkest shadow used by the card to be light so it can actually be seen
+        shadows: App.lightTheme.shadows.map((shadow, elevation) =>
+            elevation == 24
+                ? shadow.replace(/0,\s0,\s0/g, '255, 255, 255') // black to white
+                : shadow) as Shadows,
+    })
 
     static getDerivedStateFromError(error: Error) {
         return error
