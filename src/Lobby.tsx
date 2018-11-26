@@ -46,7 +46,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
         if(!node)
             node = new P2P(this.props.name, this.props.package,
             {
-                allowSameBrowser: true,
+                allowSameBrowser: process.env.NODE_ENV == 'development',
                 maxIdleTime: 10 * 60 * 1000,
             })
         else
@@ -70,7 +70,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
         return node.joinLobby()
     }
 
-    /** Simple error handling, tell the parent and disconnect */
+    /** Simple error handling, tell the parent */
     private error = (err: Error, args?: { [prop: string]: any }) => {
         if (args)
             for (const prop in args)
@@ -78,9 +78,6 @@ export default class Lobby extends React.PureComponent<Props, State> {
 
         if (this.props.onError)
             this.props.onError(err)
-
-        // if (node)
-        //     node.disconnect()
     }
 
     private handleJoinGroup = (id: string) => {

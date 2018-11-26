@@ -2,7 +2,7 @@ import * as React from 'react'
 import Clock from './Clock'
 import CardUI from './Card'
 import Loading from './Loading'
-import { Player, Game, Card, Events } from 'sets-game-engine'
+import { Player, Game, Card, Events, CardSet } from 'sets-game-engine'
 import {
     Grid,
     Button,
@@ -17,7 +17,8 @@ import {
 } from '@material-ui/core'
 
 type index = number
-export type SetIndexs = [index, index, index]
+// TODO: add a packable version
+type IndexSet = [index, index, index]
 
 export interface Props {
     // Total number of players in the game
@@ -35,29 +36,29 @@ export interface Props {
     // How long the user should be banned. (Don't provide to disbale banning)
     nextTimeout?: (oldTimeout: number) => number
 
-    // Called when the main player trys to take a set
-    onTakeAttempt?: (selected: SetIndexs) => void
-
     // Called when a card's selected status is changed
     onToggle?: (index: index) => void
+
+    // Called when the main player trys to take a set
+    onTakeAttempt?: (selected: IndexSet) => void
 
     /*
     The action take a set from this game.
     This is given to parent/siblings to take sets on player's behalf.
     */
-    takeSet?: (action: (player: index, set: SetIndexs) => boolean) => void
+    takeSet?: (action: (player: index, set: IndexSet) => boolean) => void
 }
 
 interface State {
-    cards: {
-        card: Card
-        enter: number // 0, means to remove
-    }[]
-    selected: index[] // indexs of the cards in state
-    hints: index[]
     bans: { [playerIndex: number]: number } // how far the player has progressed on their ban
     scores: number[]
     finished: boolean
+
+    // Data for displaying cards properly
+    card: Card[]
+    enter: number[] // order for cards to appear. 0, means to remove
+    selected: boolean[]
+    hint: boolean[]
 }
 
 export default class GameUI extends React.Component<Props, State> {
@@ -71,12 +72,14 @@ export default class GameUI extends React.Component<Props, State> {
     private end?: Date
 
     readonly state: State = {
-        cards: [],
-        selected: [],
-        hints: [],
         bans: {},
         scores: (new Array(this.props.players)).fill(0),
         finished: false,
+
+        card: [],
+        enter: [],
+        selected: [],
+        hint: [],
     }
 
     /** Defualts for single player mode */
@@ -114,29 +117,29 @@ export default class GameUI extends React.Component<Props, State> {
     }
 
     /** Action to take a set from the deck for a player */
-    private takeSet = (player: index, set: SetIndexs) => {
+    private takeSet = (player: index, set: IndexSet) => {
         this.setState({
-            selected: [],
-            hints: [],
+            selected: Array(this.state.card.length).fill(false),
+            hint:     Array(this.state.card.length).fill(false),
         })
-        return this.players[player].takeSet(...set)
+        return this.players[player].takeSet(...this.state.card.filter((_, index) => set.includes(index)) as CardSet)
     }
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
+        const selectedIndexs = this.state.selected
+            .map((selected, index) => selected ? index : undefined)
+            .filter(index => index != undefined) as IndexSet // clean up undefined
         if (this.props.onTakeAttempt)
-            this.props.onTakeAttempt(this.state.selected as SetIndexs)
+            this.props.onTakeAttempt(selectedIndexs)
         if (!this.props.preventTakeAction)
-            this.takeSet(0, this.state.selected as SetIndexs)
+            this.takeSet(0, selectedIndexs)
     }
 
     /** Main player toggles a card */
     private toggleCard = (index: index) => {
         const { selected } = this.state
-        if (selected.includes(index))
-            selected.splice(selected.indexOf(index), 1)
-        else
-            selected.push(index)
+        selected[index] = !selected[index]
         if (this.props.onToggle)
             this.props.onToggle(index)
         this.setState({selected})
@@ -182,59 +185,61 @@ export default class GameUI extends React.Component<Props, State> {
         this.setState({bans})
     }
 
-    /** Add card to state and animate it in order. */
+    /** Remove cards in place, and animate new cards in order. */
     private onGrab = (removedSet: [Card, Card, Card]) =>
         this.setState({
             scores: this.players.map(player => player.score),
-            cards: this.state.cards.map(({card, enter}) => ({
-                    card,
-                    // leave `enter` the same. But if the card is in `removedSet` set to 0.
-                    enter: enter * +!removedSet.includes(card),
-                })),
+            enter: this.state.enter.map((enter, index) =>
+                        removedSet.includes(this.state.card[index]) ? 0 : enter),
         })
 
-    /** Remove cards in place, and animate new cards in order. */
+    /** Add card to state and animate it in order. */
     private onFill = () => {
         let count = 1
+        const cards = [...this.game.playableCards]
+
         const refillCards = () =>
             this.setState({
-                cards: this.game.playableCards.map((card, index) => ({
-                    card,
-                    enter: this.state.cards[index] && this.state.cards[index].enter
-                        ? this.state.cards[index].enter
-                        : count++
-                }))
+                card: cards,
+                enter: cards.map((card, index) => this.state.card[index] && this.state.card[index].encoding == card.encoding
+                    ? this.state.enter[index] // keep same if it exists
+                    : count++ ),
+                selected: Array(cards.length).fill(false),
+                hint:     Array(cards.length).fill(false),
             })
 
-        if (this.state.cards.length) // wait for old cards to leave
+        if (this.state.card.length) // wait for old cards to leave
             setTimeout(refillCards, 250)
         else
             refillCards()
     }
 
     private giveHint = () => {
-        const ungivenHints = this.game.hint().filter(index => !this.state.hints.includes(index))
-        if (ungivenHints.length) // still have hints to give
-            this.setState({
-                hints: [
-                    ...this.state.hints,
-                    ungivenHints[Math.floor(Math.random() * ungivenHints.length)],
-                ],
-            })
+        const { hint, card } = this.state
+        const hints = this.game.hint()
+
+        const ungivenCards = card.filter((c, index) => hints.includes(c) && !hint[index])
+
+        if (ungivenCards.length) {
+            // index of a card
+            hint[ card.indexOf(ungivenCards[Math.floor(Math.random() * ungivenCards.length)]) ] = true
+            this.setState({hint})
+        }
     }
 
     render = () => !this.state.finished
         ? <>
-            {this.state.cards.map(({card, enter}, index) =>
+            {this.state.card.map((card, index) =>
                 <Zoom
                     key={card.encoding}
-                    in={!!enter}
-                    style={{transitionDelay: enter ? `${(enter - 1)* 250}ms` : undefined}} >
+                    in={!!this.state.enter[index]}
+                    style={{transitionDelay: this.state.enter[index] ? `${(this.state.enter[index] - 1)* 250}ms` : undefined}}
+                >
                     <Grid item container sm={4} xs={6} justify="center">
                         <CardUI
                             card={card}
-                            selected={this.state.selected.includes(index)}
-                            hint={this.state.hints.includes(index)}
+                            selected={this.state.selected[index]}
+                            hint={this.state.hint[index]}
                             toggle={() => this.toggleCard(index)} />
                     </Grid>
                 </Zoom> )}
@@ -244,7 +249,8 @@ export default class GameUI extends React.Component<Props, State> {
                         variant="contained"
                         color="primary"
                         aria-label="Take Set"
-                        disabled={this.state.selected.length != 3 || !!this.state.bans[0]}
+                        disabled={!!this.state.bans[0] || // I'm banned
+                            3 != this.state.selected.reduce((total, selected) => total + +selected, 0) }
                         onClick={this.takeSetAttempt}
                         size="large"
                     >
