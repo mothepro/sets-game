@@ -37,7 +37,6 @@ const plugins = [
         mobile: true,
         appMountId: 'app',
         lang: 'en',
-        devServer: !isProduction ? 'http://localhost:8080' : undefined,
         headHtmlSnippet: `<style>${styles.join('\n')}</style>`, 
         scripts,
         links: [

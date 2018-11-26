@@ -7,13 +7,11 @@
 + Use classes over CSS styles
 + Groups displayed in lobby properly
     + Extract to it's own resuable component?
-+ A button to get hints
 + Settings before starting game
-    + Send additional data on ready up
-+ Keyboard navigation
+    + Hint Limit, ban timer, cards to use
 + Better accessability
     + Colorblind friendly colors
-    + aria-labels + keyboard (html form?)
+    + aria-labels
 + Google analytics & Ads
 + Offline support (manifest.json)
     + Only load p2p library when going online

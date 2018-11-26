@@ -14,7 +14,15 @@ import {
     ListItemText,
     Zoom,
     IconButton,
+    Hidden,
+    ButtonBase,
+    withStyles,
+    withWidth,
+    createStyles,
+    Theme,
+    WithStyles,
 } from '@material-ui/core'
+import { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
 
 type index = number
 // TODO: add a packable version
@@ -61,7 +69,40 @@ interface State {
     hint: boolean[]
 }
 
-export default class GameUI extends React.Component<Props, State> {
+const transitionDelays: { [prop: string]: {transitionDelay: string} } = {}
+for (let i = 0; i < 50; i++)
+    transitionDelays[`enter-${i}`] = {
+        transitionDelay: `${(1 - 1)* 250}ms`
+    }
+
+const styles = ({spacing}: Theme) => createStyles({
+    card: {
+        width: '100%',
+        maxWidth: '20em',
+    },
+    info: {
+        marginTop: spacing.unit * 4,
+    },
+    score: {
+        float: 'right',
+    },
+    take: {
+        position: 'fixed',
+        bottom: spacing.unit * 2,
+        right: spacing.unit * 2,
+    },
+    options: {
+        position: 'fixed',
+        bottom: spacing.unit * 2,
+        left: spacing.unit * 2,
+    },
+    extendedIcon: { // spacing for extended fab
+        marginRight: spacing.unit,
+    },
+    // ...transitionDelays,
+})
+
+class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWidth, State> {
 
     private banHandles: WeakMap<Player, number> = new WeakMap
 
@@ -90,9 +131,14 @@ export default class GameUI extends React.Component<Props, State> {
         rng: (max: number) => Math.floor(Math.random() * max),
     }
 
-    componentWillUnmount = () => this.game.removeAllListeners()
+    componentWillUnmount = () => {
+        document.removeEventListener('keydown', this.keybinds)
+        this.game.removeAllListeners()
+    }
 
     componentDidMount() {
+        document.addEventListener('keydown', this.keybinds)
+
         // Make the game here in case our RNG method switches
         this.game = new Game({
             rng: this.props.rng,
@@ -116,6 +162,22 @@ export default class GameUI extends React.Component<Props, State> {
         this.game.start()
     }
 
+    /** Whether a set can be taken */
+    private canTake = () =>
+        !this.state.bans[0] && // not banned
+        this.state.selected.reduce((total, selected) => total + +selected, 0) == 3  // exactly 3 cards selected
+
+    /**
+     * Add keyboard shortcuts.
+     * + Pressing `enter` tries to take a set
+     */
+    private keybinds = (event: KeyboardEvent) => {
+        if (event.keyCode == 13) { // enter
+            event.preventDefault()
+            this.takeSetAttempt()
+        }
+    }
+
     /** Action to take a set from the deck for a player */
     private takeSet = (player: index, set: IndexSet) => {
         this.setState({
@@ -127,6 +189,9 @@ export default class GameUI extends React.Component<Props, State> {
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
+        if(!this.canTake())
+            return false
+
         const selectedIndexs = this.state.selected
             .map((selected, index) => selected ? index : undefined)
             .filter(index => index != undefined) as IndexSet // clean up undefined
@@ -236,68 +301,68 @@ export default class GameUI extends React.Component<Props, State> {
                     style={{transitionDelay: this.state.enter[index] ? `${(this.state.enter[index] - 1)* 250}ms` : undefined}}
                 >
                     <Grid item container sm={4} xs={6} justify="center">
-                        <CardUI
-                            card={card}
-                            selected={this.state.selected[index]}
-                            hint={this.state.hint[index]}
-                            toggle={() => this.toggleCard(index)} />
+                        <ButtonBase
+                            focusRipple
+                            component="button"
+                            onClick={() => this.toggleCard(index)}
+                            className={this.props.classes.card}
+                         >
+                            <CardUI
+                                card={card}
+                                selected={this.state.selected[index]}
+                                hint={this.state.hint[index]} />
+                        </ButtonBase>
                     </Grid>
                 </Zoom> )}
-            <Grid container style={{marginTop: '2em'}} justify="space-around" spacing={24}>
-                <Grid item sm xs={12}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        aria-label="Take Set"
-                        disabled={!!this.state.bans[0] || // I'm banned
-                            3 != this.state.selected.reduce((total, selected) => total + +selected, 0) }
-                        onClick={this.takeSetAttempt}
-                        size="large"
-                    >
-                        <Icon style={{margin: '.5em 1em .5em 0'}}>done_outline</Icon>
-                        Take Set
-                        {this.state.bans[0] &&
-                            <Loading
-                                variant="determinate"
-                                color="secondary"
-                                value={this.state.bans[0]} /> }
-                    </Button>
-                </Grid>
-                <Grid item sm xs={12}>
-                    {this.props.players == 1
-                        ? // Just show a sentence in solo mode
-                        <Typography variant="h5">
-                            {this.state.scores[0] == 0
-                                ? 'You have not collected any sets yet'
-                                : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
-                        </Typography>
-                        : // Leaderboard
-                        <Paper>
-                            <List>
-                                {this.props.names.map((name, index) =>
-                                    <ListItem key={index} disabled={!!this.state.bans[index]}>
-                                        <ListItemText>
-                                            <Typography variant="overline" style={{float: 'right'}}>
-                                                {this.state.scores[index]}
-                                            </Typography>
-                                            {name}
-                                        </ListItemText>
-                                        {this.state.bans[index] && // player is banned
-                                            <Loading
-                                                variant="determinate"
-                                                color="secondary"
-                                                value={this.state.bans[index]} />}
-                                    </ListItem> )}
-                            </List>
-                        </Paper> }
-                </Grid>
-                <Grid item sm>
-                    <IconButton onClick={this.giveHint}>
-                        <Icon>help_outline</Icon>
-                    </IconButton>
-                    <Clock />
-                </Grid>
-            </Grid>
+            {this.props.players == 1
+                ? // Just show a sentence in solo mode
+                <Typography variant="h5" className={this.props.classes.info}>
+                    {this.state.scores[0] == 0
+                        ? 'You have not collected any sets yet'
+                        : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
+                </Typography>
+                : // Leaderboard
+                <Paper className={this.props.classes.info}>
+                    <List>
+                        {this.props.names.map((name, index) =>
+                            <ListItem key={index} disabled={!!this.state.bans[index]}>
+                                <ListItemText>
+                                    <Typography variant="overline" className={this.props.classes.score}>
+                                        {this.state.scores[index]}
+                                    </Typography>
+                                    {name}
+                                </ListItemText>
+                                {this.state.bans[index] && // player is banned
+                                    <Loading
+                                        variant="determinate"
+                                        color="secondary"
+                                        value={this.state.bans[index]} />}
+                            </ListItem> )}
+                    </List>
+                </Paper> }
+            <div className={this.props.classes.options}>
+                <IconButton onClick={this.giveHint} aria-label="Get Hint">
+                    <Icon>help_outline</Icon>
+                </IconButton>
+                <Clock />
+            </div>
+            <Button
+                variant={isWidthUp('sm', this.props.width) ? 'extendedFab' : 'fab'}
+                color="primary"
+                aria-label="Take Set"
+                disabled={!this.canTake()}
+                onClick={this.takeSetAttempt}
+                size={isWidthUp('sm', this.props.width) ? 'large' : undefined}
+                className={this.props.classes.take}
+            >
+                <Icon className={isWidthUp('sm', this.props.width) ? this.props.classes.extendedIcon : undefined}>done_outline</Icon>
+                <Hidden only="xs">Take Set</Hidden>
+                {this.state.bans[0] &&
+                    <Loading
+                        variant="determinate"
+                        color="secondary"
+                        value={this.state.bans[0]} /> }
+            </Button>
         </>
         : // TODO Show winners once game is finished.
         <Typography variant="overline">
@@ -306,3 +371,5 @@ export default class GameUI extends React.Component<Props, State> {
         </Typography>
 
 }
+
+export default withStyles(styles)(withWidth()(GameUI))

@@ -7,7 +7,6 @@ import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
 interface Props extends WithStyles<typeof styles>, WithWidth {
     card: Card
     selected: boolean
-    toggle?: () => void
     hint?: boolean
 }
 
@@ -35,10 +34,8 @@ const COLORS = {
 
 const styles = ({spacing}: Theme) => createStyles({
     card: {
-        position: 'relative',
         width: '100%',
         maxWidth: '20em',
-        cursor: 'pointer',
         paddingTop: spacing.unit * 4,
         paddingBottom: spacing.unit * 4,
         transition: 'box-shadow 250ms',
@@ -51,13 +48,10 @@ const styles = ({spacing}: Theme) => createStyles({
     },
 })
 
-const CardUI = ({card, selected, toggle, hint = false, width, classes}: Props) =>
-    <Paper
-        onClick={toggle}
-        elevation={selected ? 24 : 2}
-        className={classes.card}
-    >
-        {hint && <Icon className={classes.hint}>star</Icon> /* Annie's idea */}
+const CardUI = ({card, selected, hint = false, width, classes}: Props) =>
+    <Paper className={classes.card} elevation={selected ? 24 : 2}>
+        {hint && // Annie's Idea
+            <Icon className={classes.hint}>star</Icon>}
         {[...Array(1 + card.quantity)].map((_, i) => 
             <Shape
                 key={i}
