@@ -80,9 +80,6 @@ const styles = ({spacing}: Theme) => createStyles({
         width: '100%',
         maxWidth: '20em',
     },
-    info: {
-        marginTop: spacing.unit * 4,
-    },
     score: {
         float: 'right',
     },
@@ -96,9 +93,9 @@ const styles = ({spacing}: Theme) => createStyles({
         bottom: spacing.unit * 2,
         left: spacing.unit * 2,
     },
-    extendedIcon: { // spacing for extended fab
-        marginRight: spacing.unit,
-    },
+
+    gutterRight: { marginRight: spacing.unit },
+    gutterTop: { marginTop: spacing.unit * 4 },
     // ...transitionDelays,
 })
 
@@ -304,7 +301,12 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                         <ButtonBase
                             focusRipple
                             component="div"
-                            onClick={() => this.toggleCard(index)}
+                            onClick={event => { // must be here since `index` is used
+                                // If the `Enter` key was used to trigger this, ignore it since the keybind takes priority.
+                                if((event as unknown as React.KeyboardEvent).keyCode == 13)
+                                    return event.preventDefault()
+                                this.toggleCard(index)
+                            }}
                             className={this.props.classes.card}
                          >
                             <CardUI
@@ -316,13 +318,13 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 </Zoom> )}
             {this.props.players == 1
                 ? // Just show a sentence in solo mode
-                <Typography variant="h5" className={this.props.classes.info}>
+                <Typography variant="h5" className={this.props.classes.gutterTop}>
                     {this.state.scores[0] == 0
                         ? 'You have not collected any sets yet'
                         : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
                 </Typography>
                 : // Leaderboard
-                <Paper className={this.props.classes.info}>
+                <Paper className={this.props.classes.gutterTop}>
                     <List>
                         {this.props.names.map((name, index) =>
                             <ListItem key={index} disabled={!!this.state.bans[index]}>
@@ -355,7 +357,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 size={isWidthUp('sm', this.props.width) ? 'large' : undefined}
                 className={this.props.classes.take}
             >
-                <Icon className={isWidthUp('sm', this.props.width) ? this.props.classes.extendedIcon : undefined}>done_outline</Icon>
+                <Icon className={isWidthUp('sm', this.props.width) ? this.props.classes.gutterRight : undefined}>done_outline</Icon>
                 <Hidden only="xs">Take Set</Hidden>
                 {this.state.bans[0] &&
                     <Loading
