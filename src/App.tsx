@@ -85,14 +85,6 @@ export default class App extends React.Component<Props, State> {
         <MuiThemeProvider theme={this.state.lightTheme ? App.lightTheme : App.darkTheme}>
             <CssBaseline />
 
-            <IconButton onClick={this.toggleTheme} style={{
-                    position: 'absolute',
-                    right:    App.lightTheme.spacing.unit,
-                    top:      App.lightTheme.spacing.unit,
-            }}>
-                    <Icon fontSize="small">wb_incandescent</Icon>
-            </IconButton>
-
             {(this.state.inGame || this.state.online) &&
                 <IconButton onClick={this.goBack} style={{
                         position: 'absolute',
@@ -101,6 +93,14 @@ export default class App extends React.Component<Props, State> {
                 }}>
                         <Icon fontSize="small">arrow_back</Icon>
                 </IconButton> }
+
+            <IconButton onClick={this.toggleTheme} style={{
+                    position: 'absolute',
+                    right:    App.lightTheme.spacing.unit,
+                    top:      App.lightTheme.spacing.unit,
+            }}>
+                    <Icon fontSize="small">wb_incandescent</Icon>
+            </IconButton>
 
             {this.state.error &&
                 <Dialog open onClose={this.removeError}>

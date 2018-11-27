@@ -36,7 +36,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
     componentWillUnmount() {
         if (node && !this.preserve) {
             node.removeAllListeners()
-            node['leaveRoom']() // TODO make public
+            node.leave()
         }
     }
 
@@ -44,11 +44,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
     componentDidMount() {
         this.preserve = false
         if(!node)
-            node = new P2P(this.props.name, this.props.package,
-            {
-                allowSameBrowser: process.env.NODE_ENV == 'development',
-                maxIdleTime: 10 * 60 * 1000,
-            })
+            node = new P2P(this.props.name, this.props.package, {allowSameBrowser: process.env.NODE_ENV == 'development'})
         else
             node.removeAllListeners()
         node.on(Events.error, this.error)
@@ -57,6 +53,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
 
         // Only update the lobby if no one is in our room
         node.on(Events.lobbyConnect, () => this.setState({loading: false}))
+        // TODO: Find a player again once click back
         node.on(Events.lobbyChange,  () => !node!.inGroup && this.setState({peers: [...node!.lobbyPeers]}))
 
         node.on(Events.groupStart,     () => this.setState({loading: false}))
@@ -67,7 +64,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
             canReadyUp: node!.isLeader,
         }))
 
-        return node.joinLobby()
+        return node.joinLobby({maxIdle: 10 * 60 * 1000})
     }
 
     /** Simple error handling, tell the parent */
