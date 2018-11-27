@@ -350,7 +350,11 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                     </List>
                 </Paper> }
             <div className={this.props.classes.options}>
-                <IconButton onClick={this.giveHint} aria-label="Get Hint">
+                <IconButton
+                    aria-label="Get Hint"
+                    onClick={this.giveHint}
+                    disabled={this.state.hint.reduce((total, hint) => total + +hint, 0) >= 3}
+                >
                     <Icon>help_outline</Icon>
                 </IconButton>
                 <Clock />
