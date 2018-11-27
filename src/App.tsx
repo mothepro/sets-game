@@ -121,7 +121,7 @@ export default class App extends React.Component<Props, State> {
                     </DialogContent>
                 </Dialog> }
 
-            <Grid container style={{padding: '2em'}} justify="center" spacing={24}>
+            <Grid container style={{padding: '2em', textAlign: 'center'}} justify="center" spacing={24}>
                 <Grid item xs={12}>
                     <Typography variant="h2" gutterBottom>
                         Sets 

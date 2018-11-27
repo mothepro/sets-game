@@ -15,6 +15,7 @@
 + Google analytics & Ads
 + Offline support (manifest.json)
     + Only load p2p library when going online
++ Notification when joining group
 
 ## [Source Code](https://github.com/mothepro/sets-game)
 

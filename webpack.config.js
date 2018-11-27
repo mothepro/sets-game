@@ -22,11 +22,6 @@ const scripts = isProduction
         'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.js',
     ]
 
-const styles = [
-    'body { text-align: center }', // Keep centered cause its a game!
-    '#app { overflow: hidden }',   // Weird horizontal scroll. See: https://github.com/mui-org/material-ui/issues/7466
-]
-
 const plugins = [
     new HtmlWebpackPlugin({
         // Required for 'html-webpack-template'
@@ -37,7 +32,9 @@ const plugins = [
         mobile: true,
         appMountId: 'app',
         lang: 'en',
-        headHtmlSnippet: `<style>${styles.join('\n')}</style>`, 
+
+        // Weird horizontal scroll. See: https://github.com/mui-org/material-ui/issues/7466
+        headHtmlSnippet: `<style>#app { overflow: hidden }</style>`, 
         scripts,
         links: [
             "https://fonts.googleapis.com/css?family=Roboto:300,400,500",

@@ -96,6 +96,7 @@ const styles = ({spacing}: Theme) => createStyles({
 
     gutterRight: { marginRight: spacing.unit },
     gutterTop: { marginTop: spacing.unit * 4 },
+    gutterBottom: { marginBottom: spacing.unit * 5 },
     // ...transitionDelays,
 })
 
@@ -318,13 +319,19 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 </Zoom> )}
             {this.props.players == 1
                 ? // Just show a sentence in solo mode
-                <Typography variant="h5" className={this.props.classes.gutterTop}>
+                <Typography variant="h5" className={
+                    this.props.classes.gutterTop
+                    + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom) // leave room for fixed buttons
+                }>
                     {this.state.scores[0] == 0
                         ? 'You have not collected any sets yet'
                         : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
                 </Typography>
                 : // Leaderboard
-                <Paper className={this.props.classes.gutterTop}>
+                <Paper className={
+                    this.props.classes.gutterTop
+                    + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom)
+                }>
                     <List>
                         {this.props.names.map((name, index) =>
                             <ListItem key={index} disabled={!!this.state.bans[index]}>
