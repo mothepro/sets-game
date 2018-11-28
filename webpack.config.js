@@ -1,4 +1,5 @@
-const title = 'Sets the Game'
+const title = 'Sets the Game',
+    logo = './Sets.png'
 
 const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 const path = require('path')
@@ -7,6 +8,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const OfflinePlugin = require('offline-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 const links =[
       'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
@@ -51,6 +53,7 @@ const plugins = [
             collapseBooleanAttributes: true,
         }
     }),
+    new FaviconsWebpackPlugin(logo),
     new WebpackPwaManifest({
         name: title,
         short_name: 'Sets',
@@ -59,7 +62,7 @@ const plugins = [
         theme_color: '#ffffff',
         crossorigin: 'anonymous',
         icons: [{
-            src: path.resolve('./Sets.png'),
+            src: path.resolve(logo),
             sizes: [96, 128, 192, 256, 384, 512, 1024],
         }]
     }),
