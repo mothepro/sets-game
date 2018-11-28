@@ -323,7 +323,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 item
                 container
                 justify="center"
-                md={6} sm={8} xs
+                md={6} sm={8} xs={12}
                 className={this.props.classes.gutterTop
                     // leave room for fixed buttons
                     + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom)

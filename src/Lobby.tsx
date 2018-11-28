@@ -7,12 +7,16 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import {CardOption, Props as GameProps} from './Game'
 import { Selection } from './messages'
 
-interface Props {
+interface Props extends WithStyles<typeof styles> {
     package: string
     name: string
     onDisconnect: () => void
     onStart: (opts: GameProps) => void
     onError?: (error: Error) => void
+}
+
+interface LoadingProps extends WithStyles<typeof styles> {
+    size?: number
 }
 
 interface State {
@@ -25,7 +29,10 @@ interface State {
 let node: P2P<string>
 
 const styles = ({spacing}: Theme) => createStyles({
-    loading: {
+    readyBtn: {
+        marginTop: '2em',
+    },
+    loadingIcon: {
         position:  'fixed',
         top:       '50%',
         left:      '50%',
@@ -34,17 +41,14 @@ const styles = ({spacing}: Theme) => createStyles({
             marginTop: spacing.unit * 2,
         },
     },
+
+    fullWidth: { width: '100%' },
 })
-
-
-interface LoadingProps extends WithStyles<typeof styles> {
-    size?: number
-}
 
 /** Simple Loading Component that accepts text as well. */
 const Loading = withStyles(styles)(
     ({classes, children, size = 24, ...props}: CircularProgressProps & LoadingProps) =>
-        <div className={classes.loading}>
+        <div className={classes.loadingIcon}>
             <CircularProgress {...props} size={size} />
             {typeof children == 'string'
                 ? <Typography variant="overline">{children}</Typography>
@@ -52,7 +56,7 @@ const Loading = withStyles(styles)(
         </div>
 )
 
-export default class Lobby extends React.PureComponent<Props, State> {
+class Lobby extends React.PureComponent<Props, State> {
 
     /** When true, preserves node's listeners and doesn't leave the room */
     private preserve = false
@@ -161,7 +165,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
 
     render = () => this.state.peers.length
         ? <Grid item container sm={6} md={4} justify="center">
-            <Paper style={{width: '100%'}}>
+            <Paper className={this.props.classes.fullWidth}>
                 <List subheader={
                     <ListSubheader>
                         {this.state.hasGroup
@@ -182,18 +186,17 @@ export default class Lobby extends React.PureComponent<Props, State> {
                         </ListItem> )}
                 </List>
             </Paper>
-            {this.state.canReadyUp
-                ? <Button
-                    style={{marginTop: '2em'}} // clean these up
+            {this.state.canReadyUp &&
+                <Button
+                    className={this.props.classes.readyBtn}
                     disabled={this.state.loading}
                     variant="contained"
                     color="primary"
                     size="large"
                     onClick={this.handleReadyBtn} >
                     Start Game
-                    {this.state.loading && <Loading />}
-                </Button>
-                : this.state.loading &&
+                </Button> }
+            {this.state.loading &&
                 <Loading size={64}>
                     {this.state.hasGroup
                         ? 'Starting Game'
@@ -207,3 +210,5 @@ export default class Lobby extends React.PureComponent<Props, State> {
                 : 'Searching for other players'}
         </Loading>
 }
+
+export default withStyles(styles)(Lobby)
