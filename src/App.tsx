@@ -50,7 +50,7 @@ export default class App extends React.Component<Props, State> {
 
         // Convert the darkest shadow used by the card to be light so it can actually be seen
         shadows: App.lightTheme.shadows.map((shadow, elevation) =>
-            elevation == 24
+            elevation == 16
                 ? shadow.replace(/0,\s0,\s0/g, '255, 255, 255') // black to white
                 : shadow) as Shadows,
     })
@@ -124,7 +124,7 @@ export default class App extends React.Component<Props, State> {
             <Grid container style={{padding: '2em', textAlign: 'center'}} justify="center" spacing={24}>
                 <Grid item xs={12}>
                     <Typography variant="h2" gutterBottom>
-                        Sets 
+                        Sets
                         <span style={{fontSize: '.25em', marginLeft: '1em'}}>by Mo</span>
                     </Typography>
                 </Grid>

@@ -49,11 +49,11 @@ const styles = ({spacing}: Theme) => createStyles({
 })
 
 const CardUI = ({card, selected, hint = false, width, classes}: Props) =>
-    <Paper className={classes.card} elevation={selected ? 24 : 2}>
+    <Paper className={classes.card} elevation={selected ? 16 : 2}>
         <Zoom in={hint} timeout={1000}>
             <Icon className={classes.hint}>star</Icon>
         </Zoom>
-        {[...Array(1 + card.quantity)].map((_, i) => 
+        {[...Array(1 + card.quantity)].map((_, i) =>
             <Shape
                 key={i}
                 color={COLORS[card.color]}
