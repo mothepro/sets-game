@@ -1,10 +1,7 @@
 import * as React from 'react'
 import P2P, { Events } from 'p2p-lobby'
-import { Button, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider, CircularProgress, Theme, Typography, WithStyles } from '@material-ui/core'
-import { CircularProgressProps } from '@material-ui/core/CircularProgress'
-import createStyles from '@material-ui/core/styles/createStyles'
-import withStyles from '@material-ui/core/styles/withStyles'
-import {CardOption, Props as GameProps} from './Game'
+import { Button, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider, CircularProgress, Theme, Typography, WithStyles, createStyles, withStyles } from '@material-ui/core'
+import {Props as GameProps} from './Game'
 import { Selection } from './messages'
 
 interface Props extends WithStyles<typeof styles> {
@@ -115,9 +112,6 @@ class Lobby extends React.PureComponent<Props, State> {
     private onReady = () => {
         this.preserve = true
 
-        // This is the action to grab a set for a player on the local game
-        let takeSet: (player: number, set: CardOption) => void
-
         // Make map of group members to player indexs and names
         const peerIndex: { [id: string]: number } = { [node!['id']]: 0 }
         const names = [ node!.name ]
@@ -132,23 +126,25 @@ class Lobby extends React.PureComponent<Props, State> {
         node.on(Events.error, this.error)
         node.on(Events.disconnected, () => this.error(Error('Disconnected from network.')))
         node.on(Events.groupLeft, peerId => this.error(Error(`${node!.getPeerName(peerId)} left the game`)))
-        node.on(Events.data, ({peer, data}) => { // where the magic happens
-            if (peer in peerIndex)
-                if(data instanceof Selection)
-                    return takeSet(peerIndex[peer], data.selection)
-            this.error(Error(`Received unexpected data from ${node!.getPeerName(peer)}.`), {data})
-        })
 
         this.props.onStart({
             names,
             preventTakeAction: true,
             rng:           max => Math.abs(node!.random(true)) % max,
-            players:       1 + node!.groupPeers.size,
-            takeSet:       action => takeSet = action, // save the action to the outer scope
+            players:       1 + node.groupPeers.size,
             onTakeAttempt: set => node.broadcast(new Selection(set)),
             nextTimeout: (oldTimeout: number) => oldTimeout == 0
-                ? 5 * 1000              // ban for 5 seconds by default
-                : oldTimeout + 5 * 1000 // increase ban individually
+                ? 5 * 1000               // ban for 5 seconds by default
+                : oldTimeout + 5 * 1000, // increase ban individually
+            
+            // Where the magic happens
+            takeSet: takeSet =>
+                node.on(Events.data, ({peer, data}) => {
+                    if (peer in peerIndex)
+                        if(data instanceof Selection)
+                            return takeSet(peerIndex[peer], data.selection)
+                    this.error(Error(`Received unexpected data from ${node!.getPeerName(peer)}.`), {data})
+                }),
         })
     }
 

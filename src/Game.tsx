@@ -22,7 +22,7 @@ import {
     WithStyles,
     CircularProgress,
 } from '@material-ui/core'
-import { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
+import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
 
 type index = number
 export type CardOption = boolean[]
@@ -325,7 +325,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 justify="center"
                 md={6} sm={8} xs={12}
                 className={this.props.classes.gutterTop
-                    // leave room for fixed buttons
+                    // make space room for fixed buttons
                     + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom)
                 } >
                 {this.props.players == 1
