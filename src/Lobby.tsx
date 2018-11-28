@@ -30,7 +30,7 @@ let node: P2P<string>
 
 const styles = ({spacing}: Theme) => createStyles({
     readyBtn: {
-        marginTop: '2em',
+        marginTop: spacing.unit * 2,
     },
     loadingIcon: {
         position:  'fixed',
@@ -44,17 +44,6 @@ const styles = ({spacing}: Theme) => createStyles({
 
     fullWidth: { width: '100%' },
 })
-
-/** Simple Loading Component that accepts text as well. */
-const Loading = withStyles(styles)(
-    ({classes, children, size = 24, ...props}: CircularProgressProps & LoadingProps) =>
-        <div className={classes.loadingIcon}>
-            <CircularProgress {...props} size={size} />
-            {typeof children == 'string'
-                ? <Typography variant="overline">{children}</Typography>
-                : children }
-        </div>
-)
 
 class Lobby extends React.PureComponent<Props, State> {
 
@@ -197,18 +186,24 @@ class Lobby extends React.PureComponent<Props, State> {
                     Start Game
                 </Button> }
             {this.state.loading &&
-                <Loading size={64}>
-                    {this.state.hasGroup
-                        ? 'Starting Game'
-                        : 'Joining Group'}
-                </Loading> }
+                <div className={this.props.classes.loadingIcon}>
+                    <CircularProgress size={64} />
+                    <Typography variant="overline">
+                        {this.state.hasGroup
+                            ? 'Starting Game'
+                            : 'Joining Group'}
+                    </Typography>
+                </div> }
         </Grid>
         : // If we don't see any peers, we must be connecting or looking
-        <Loading size={64}>
-            {this.state.loading
-                ? 'Connecting to Peer-to-Peer network'
-                : 'Searching for other players'}
-        </Loading>
+        <div className={this.props.classes.loadingIcon}>
+            <CircularProgress size={64} />
+            <Typography variant="overline">
+                {this.state.loading
+                    ? 'Connecting to Peer-to-Peer network'
+                    : 'Searching for other players'}
+            </Typography>
+        </div>
 }
 
 export default withStyles(styles)(Lobby)
