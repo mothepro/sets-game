@@ -37,9 +37,6 @@ const plugins = [
         mobile: true,
         appMountId: 'app',
         lang: 'en',
-
-        // Weird horizontal scroll. See: https://github.com/mui-org/material-ui/issues/7466
-        headHtmlSnippet: '<style>#app { overflow: hidden }</style>',
         scripts,
         links,
         minify: isProduction && {

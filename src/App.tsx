@@ -14,10 +14,14 @@ import {
 	DialogContentText,
 	Grid,
     Typography,
+    withStyles,
+    createStyles,
+    WithStyles,
+    Theme,
 } from '@material-ui/core'
 import { Shadows } from '@material-ui/core/styles/shadows'
 
-interface Props {
+interface Props extends WithStyles<typeof styles> {
     package: string
 }
 
@@ -28,7 +32,31 @@ interface State {
     error?: Error
 }
 
-export default class App extends React.Component<Props, State> {
+const styles = ({spacing, typography}: Theme) => createStyles({
+    app: {
+        padding: spacing.unit * 4, // dont touch the edge
+        textAlign: 'center', // cause its a game
+
+        // Weird horizontal scroll. Cause by negative margin and extra width
+        // See: https://github.com/mui-org/material-ui/issues/7466
+        margin: 0,
+        width: '100%',
+    },
+    subTitle: {
+        fontSize: typography.fontSize,
+    },
+    errorInfo: {
+        fontFamily: 'Consolas, "Liberation Mono", Menlo, monospace',
+        whiteSpace: 'pre',
+        display: process.env.NODE_ENV == 'development' ? 'block' : 'none',
+    },
+
+    top: { position: 'absolute', top: spacing.unit },
+    left: { left: spacing.unit },
+    right: { right: spacing.unit },
+})
+
+class App extends React.Component<Props, State> {
 
     private gameProps?: GameProps
     private name?: string
@@ -86,20 +114,12 @@ export default class App extends React.Component<Props, State> {
             <CssBaseline />
 
             {(this.state.inGame || this.state.online) &&
-                <IconButton onClick={this.goBack} style={{
-                        position: 'absolute',
-                        left:     App.lightTheme.spacing.unit,
-                        top:      App.lightTheme.spacing.unit,
-                }}>
-                        <Icon fontSize="small">arrow_back</Icon>
+                <IconButton onClick={this.goBack} className={[this.props.classes.top, this.props.classes.left].join(' ')}>
+                    <Icon fontSize="small">arrow_back</Icon>
                 </IconButton> }
 
-            <IconButton onClick={this.toggleTheme} style={{
-                    position: 'absolute',
-                    right:    App.lightTheme.spacing.unit,
-                    top:      App.lightTheme.spacing.unit,
-            }}>
-                    <Icon fontSize="small">wb_incandescent</Icon>
+            <IconButton onClick={this.toggleTheme} className={[this.props.classes.top, this.props.classes.right].join(' ')}>
+                <Icon fontSize="small">wb_incandescent</Icon>
             </IconButton>
 
             {this.state.error &&
@@ -110,22 +130,18 @@ export default class App extends React.Component<Props, State> {
                         <Typography
                             variant="overline"
                             align="left"
-                            style={{
-                                fontFamily: 'Consolas, "Liberation Mono", Menlo, monospace',
-                                whiteSpace: 'pre',
-                                display: 'none', // must go looking for this
-                            }} >
+                            className={this.props.classes.errorInfo} >
                             {this.state.error.stack}
                             {JSON.stringify({...this.state.error}, null, 2)}
                         </Typography>
                     </DialogContent>
                 </Dialog> }
 
-            <Grid container style={{padding: '2em', textAlign: 'center'}} justify="center" spacing={24}>
+            <Grid container className={this.props.classes.app} justify="center" spacing={24}>
                 <Grid item xs={12}>
                     <Typography variant="h2" gutterBottom>
-                        Sets
-                        <span style={{fontSize: '.25em', marginLeft: '1em'}}>by Mo</span>
+                        Sets{' '}
+                        <span className={this.props.classes.subTitle}>by Mo</span>
                     </Typography>
                 </Grid>
                 { this.state.inGame
@@ -142,3 +158,5 @@ export default class App extends React.Component<Props, State> {
             </Grid>
         </MuiThemeProvider>
 }
+
+export default withStyles(styles)(App)

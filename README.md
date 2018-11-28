@@ -16,6 +16,7 @@
 + Offline support (manifest.json)
     + Only load p2p library when going online
 + Notification when joining group
++ Notification for 'beforeinstallprompt' for add to homescreen
 
 ## [Source Code](https://github.com/mothepro/sets-game)
 
