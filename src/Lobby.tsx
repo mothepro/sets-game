@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { Props as GameProps } from './Game'
-import Loading from './Loading'
 import P2P, { Events } from 'p2p-lobby'
 import { Button, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider } from '@material-ui/core'
+import Loading from './Loading'
+import {CardOption, Props as GameProps} from './Game'
+import { Selection } from './messages'
 
 interface Props {
     package: string
@@ -79,19 +80,20 @@ export default class Lobby extends React.PureComponent<Props, State> {
 
     private handleJoinGroup = (id: string) => {
         this.setState({loading: true})
-        node!.joinGroup(id)
+        return node!.joinGroup(id)
     }
 
-    // TODO
-    /** Since the node's readyUp isn't bound (use the new syntax) `this` is undefined if called directly. */
-    private handleReadyBtn = () => node.readyUp()
+    private handleReadyBtn = () => {
+        this.setState({loading: true})
+        return node.readyUp()
+    }
 
     /** When the room host ready's up. */
     private onReady = () => {
         this.preserve = true
 
         // This is the action to grab a set for a player on the local game
-        let takeSet: (player: number, set: [number, number, number]) => void
+        let takeSet: (player: number, set: CardOption) => void
 
         // Make map of group members to player indexs and names
         const peerIndex: { [id: string]: number } = { [node!['id']]: 0 }
@@ -107,12 +109,11 @@ export default class Lobby extends React.PureComponent<Props, State> {
         node.on(Events.error, this.error)
         node.on(Events.disconnected, () => this.error(Error('Disconnected from network.')))
         node.on(Events.groupLeft, peerId => this.error(Error(`${node!.getPeerName(peerId)} left the game`)))
-        // where the magic happens
-        node.on(Events.data, ({peer, data}) => {
-            if (peerIndex[peer] != undefined && Array.isArray(data) && data.length == 3) // janky packer
-                takeSet(peerIndex[peer], data as [number, number, number])
-            else
-                this.error(Error(`Recieved unexpected data from ${node!.getPeerName(peer)}.`), {data})
+        node.on(Events.data, ({peer, data}) => { // where the magic happens
+            if (peer in peerIndex)
+                if(data instanceof Selection)
+                    return takeSet(peerIndex[peer], data.selection)
+            this.error(Error(`Received unexpected data from ${node!.getPeerName(peer)}.`), {data})
         })
 
         this.props.onStart({
@@ -121,7 +122,7 @@ export default class Lobby extends React.PureComponent<Props, State> {
             rng:           max => Math.abs(node!.random(true)) % max,
             players:       1 + node!.groupPeers.size,
             takeSet:       action => takeSet = action, // save the action to the outer scope
-            onTakeAttempt: set => node!.broadcast(set),
+            onTakeAttempt: set => node.broadcast(new Selection(set)),
             nextTimeout: (oldTimeout: number) => oldTimeout == 0
                 ? 5 * 1000              // ban for 5 seconds by default
                 : oldTimeout + 5 * 1000 // increase ban individually

@@ -25,8 +25,7 @@ import {
 import { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
 
 type index = number
-// TODO: add a packable version
-type IndexSet = [index, index, index]
+export type CardOption = boolean[]
 
 export interface Props {
     // Total number of players in the game
@@ -41,20 +40,20 @@ export interface Props {
     // If true, will not take set when button is pressed
     preventTakeAction: boolean
 
-    // How long the user should be banned. (Don't provide to disbale banning)
+    // How long the user should be banned. (Don't provide to disable banning)
     nextTimeout?: (oldTimeout: number) => number
 
     // Called when a card's selected status is changed
     onToggle?: (index: index) => void
 
-    // Called when the main player trys to take a set
-    onTakeAttempt?: (selected: IndexSet) => void
+    // Called when the main player tries to take a set
+    onTakeAttempt?: (selected: CardOption) => void
 
     /*
     The action take a set from this game.
     This is given to parent/siblings to take sets on player's behalf.
     */
-    takeSet?: (action: (player: index, set: IndexSet) => boolean) => void
+    takeSet?: (action: (player: index, set: CardOption) => boolean) => void
 }
 
 interface State {
@@ -65,8 +64,8 @@ interface State {
     // Data for displaying cards properly
     card: Card[]
     enter: number[] // order for cards to appear. 0, means to remove
-    selected: boolean[]
-    hint: boolean[]
+    selected: CardOption
+    hint: CardOption
 }
 
 const transitionDelays: { [prop: string]: {transitionDelay: string} } = {}
@@ -170,19 +169,19 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
      * + Pressing `enter` tries to take a set
      */
     private keybinds = (event: KeyboardEvent) => {
-        if (event.keyCode == 13) { // enter
+        if (event.code == 'Enter') {
             event.preventDefault()
             this.takeSetAttempt()
         }
     }
 
     /** Action to take a set from the deck for a player */
-    private takeSet = (player: index, set: IndexSet) => {
+    private takeSet = (player: index, set: CardOption) => {
         this.setState({
             selected: Array(this.state.card.length).fill(false),
             hint:     Array(this.state.card.length).fill(false),
         })
-        return this.players[player].takeSet(...this.state.card.filter((_, index) => set.includes(index)) as CardSet)
+        return this.players[player].takeSet(...this.state.card.filter((_, index) => set[index]) as CardSet)
     }
 
     /** Main player tries to take a set */
@@ -190,13 +189,10 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
         if(!this.canTake())
             return false
 
-        const selectedIndexs = this.state.selected
-            .map((selected, index) => selected ? index : undefined)
-            .filter(index => index != undefined) as IndexSet // clean up undefined
         if (this.props.onTakeAttempt)
-            this.props.onTakeAttempt(selectedIndexs)
+            this.props.onTakeAttempt(this.state.selected)
         if (!this.props.preventTakeAction)
-            this.takeSet(0, selectedIndexs)
+            this.takeSet(0, this.state.selected)
     }
 
     /** Main player toggles a card */
