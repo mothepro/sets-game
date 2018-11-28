@@ -1,7 +1,9 @@
 import * as React from 'react'
 import P2P, { Events } from 'p2p-lobby'
-import { Button, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider } from '@material-ui/core'
-import Loading from './Loading'
+import { Button, Grid, List, ListItem, ListItemText, Paper, ListSubheader, Divider, CircularProgress, Theme, Typography, WithStyles } from '@material-ui/core'
+import { CircularProgressProps } from '@material-ui/core/CircularProgress'
+import createStyles from '@material-ui/core/styles/createStyles'
+import withStyles from '@material-ui/core/styles/withStyles'
 import {CardOption, Props as GameProps} from './Game'
 import { Selection } from './messages'
 
@@ -21,6 +23,34 @@ interface State {
 }
 
 let node: P2P<string>
+
+const styles = ({spacing}: Theme) => createStyles({
+    loading: {
+        position:  'fixed',
+        top:       '50%',
+        left:      '50%',
+        transform: 'translate(-50%, -50%)',
+        '& span': {
+            marginTop: spacing.unit * 2,
+        },
+    },
+})
+
+
+interface LoadingProps extends WithStyles<typeof styles> {
+    size?: number
+}
+
+/** Simple Loading Component that accepts text as well. */
+const Loading = withStyles(styles)(
+    ({classes, children, size = 24, ...props}: CircularProgressProps & LoadingProps) =>
+        <div className={classes.loading}>
+            <CircularProgress {...props} size={size} />
+            {typeof children == 'string'
+                ? <Typography variant="overline">{children}</Typography>
+                : children }
+        </div>
+)
 
 export default class Lobby extends React.PureComponent<Props, State> {
 

@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Clock from './Clock'
 import CardUI from './Card'
-import Loading from './Loading'
 import { Player, Game, Card, Events, CardSet } from 'sets-game-engine'
 import {
     Grid,
@@ -21,6 +20,7 @@ import {
     createStyles,
     Theme,
     WithStyles,
+    CircularProgress,
 } from '@material-ui/core'
 import { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
 
@@ -91,6 +91,12 @@ const styles = ({spacing}: Theme) => createStyles({
         position: 'fixed',
         bottom: spacing.unit * 2,
         left: spacing.unit * 2,
+    },
+    leaderboard: {
+        width: '100%',
+    },
+    loading: {
+        position: 'absolute',
     },
 
     gutterRight: { marginRight: spacing.unit },
@@ -313,39 +319,45 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                         </ButtonBase>
                     </Grid>
                 </Zoom> )}
-            {this.props.players == 1
-                ? // Just show a sentence in solo mode
-                <Typography variant="h5" className={
-                    this.props.classes.gutterTop
-                    + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom) // leave room for fixed buttons
-                }>
-                    {this.state.scores[0] == 0
-                        ? 'You have not collected any sets yet'
-                        : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
-                </Typography>
-                : // Leaderboard
-                <Paper className={
-                    this.props.classes.gutterTop
+            <Grid
+                item
+                container
+                justify="center"
+                md={6} sm={8} xs
+                className={this.props.classes.gutterTop
+                    // leave room for fixed buttons
                     + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom)
-                }>
-                    <List>
-                        {this.props.names.map((name, index) =>
-                            <ListItem key={index} disabled={!!this.state.bans[index]}>
-                                <ListItemText>
-                                    <Typography variant="overline" className={this.props.classes.score}>
-                                        {this.state.scores[index]}
-                                    </Typography>
-                                    {name}
-                                </ListItemText>
-                                {this.state.bans[index] && // player is banned
-                                    <Loading
-                                        variant="determinate"
-                                        color="secondary"
-                                        value={this.state.bans[index]} />}
-                            </ListItem> )}
-                    </List>
-                </Paper> }
+                } >
+                {this.props.players == 1
+                    ? // Just show a sentence in solo mode
+                    <Typography variant="h5">
+                        {this.state.scores[0] == 0
+                            ? 'You have not collected any sets yet'
+                            : `You have collected ${this.state.scores[0]} set${this.state.scores[0] > 1 ? 's' : ''}`}
+                    </Typography>
+                    : // Leaderboard
+                    <Paper className={this.props.classes.leaderboard}>
+                        <List>
+                            {this.props.names.map((name, index) =>
+                                <ListItem key={index} disabled={!!this.state.bans[index]}>
+                                    <ListItemText>
+                                        <Typography variant="overline" className={this.props.classes.score}>
+                                            {this.state.scores[index]}
+                                        </Typography>
+                                        {name}
+                                    </ListItemText>
+                                    {this.state.bans[index] && // player is banned
+                                        <CircularProgress
+                                            variant="determinate"
+                                            color="secondary"
+                                            value={this.state.bans[index]}
+                                            className={this.props.classes.loading} /> }
+                                </ListItem> )}
+                        </List>
+                    </Paper> }
+            </Grid>
             <div className={this.props.classes.options}>
+                <Clock />
                 <IconButton
                     aria-label="Get Hint"
                     onClick={this.giveHint}
@@ -353,7 +365,6 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 >
                     <Icon>help_outline</Icon>
                 </IconButton>
-                <Clock />
             </div>
             <Button
                 variant={isWidthUp('sm', this.props.width) ? 'extendedFab' : 'fab'}
@@ -364,13 +375,18 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 size={isWidthUp('sm', this.props.width) ? 'large' : undefined}
                 className={this.props.classes.take}
             >
-                <Icon className={isWidthUp('sm', this.props.width) ? this.props.classes.gutterRight : undefined}>done_outline</Icon>
+                <Icon className={isWidthUp('sm', this.props.width)
+                        ? this.props.classes.gutterRight
+                        : undefined}>
+                    done_outline
+                </Icon>
                 <Hidden only="xs">Take Set</Hidden>
                 {this.state.bans[0] &&
-                    <Loading
+                    <CircularProgress
                         variant="determinate"
                         color="secondary"
-                        value={this.state.bans[0]} /> }
+                        value={this.state.bans[0]}
+                        className={this.props.classes.loading} /> }
             </Button>
         </>
         : // TODO Show winners once game is finished.
