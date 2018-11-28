@@ -1,0 +1,47 @@
+{
+  "icons": [
+    {
+      "src": "icon_1024x1024.71ac4c77cca511bf02b4c697c1a46c7d.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_512x512.a7b9d0d1c1eb511c3b9c791e70541ba0.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_384x384.554babccf175c11aea81580a827da95b.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_256x256.9d933aaba1beaa2310ee6044f75d38c4.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_192x192.21194ce037eae55e203e9c3be5eb89f1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_128x128.8e9937d130dba02bc02852b65541252f.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_96x96.c1a8dee039169b0344dffcef82fa9d33.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ],
+  "name": "Sets the Game",
+  "short_name": "Sets",
+  "orientation": "portrait",
+  "display": "standalone",
+  "start_url": ".",
+  "description": "The Card Game Sets by Mo",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
