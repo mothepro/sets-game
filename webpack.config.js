@@ -4,22 +4,27 @@ const isProduction = process.env.NODE_ENV == 'production' || process.argv.includ
 const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const OfflinePlugin = require('offline-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-const scripts = isProduction
+const links =[
+      'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
+      'https://fonts.googleapis.com/icon?family=Material+Icons',
+    ],
+  scripts = isProduction
     ? [ // Production CDN links
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.production.min.js',
-        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.js',
+        'https://unpkg.com/p2p-lobby@0.1.1/dist/umd/bundle.js',
         // Seems that this build is broken somehow?? (Probably the experimental methods)
         // 'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.min.js',
     ] : [ // Development CDN links (makes building faster)
         'https://unpkg.com/react@16.6.1/umd/react.development.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.development.js',
         'https://unpkg.com/@material-ui/core@3.3.2/umd/material-ui.development.js',
-        'https://unpkg.com/p2p-lobby@0.1.0/dist/umd/bundle.js',
+        'https://unpkg.com/p2p-lobby@0.1.1/dist/umd/bundle.js',
     ]
 
 const plugins = [
@@ -34,12 +39,9 @@ const plugins = [
         lang: 'en',
 
         // Weird horizontal scroll. See: https://github.com/mui-org/material-ui/issues/7466
-        headHtmlSnippet: `<style>#app { overflow: hidden }</style>`, 
+        headHtmlSnippet: '<style>#app { overflow: hidden }</style>',
         scripts,
-        links: [
-            "https://fonts.googleapis.com/css?family=Roboto:300,400,500",
-            "https://fonts.googleapis.com/icon?family=Material+Icons",
-        ],
+        links,
         minify: isProduction && {
             minifyCSS: true,
             minifyJS: true,
@@ -64,12 +66,14 @@ const plugins = [
             sizes: [96, 128, 192, 256, 384, 512, 1024],
         }]
     }),
+    new OfflinePlugin({
+      extenals: [...scripts, ...links],
+    }),
 ]
 
 if (isProduction)
     plugins.unshift(new CleanWebpackPlugin(['bin']))
-
-if (!isProduction)
+else
     plugins.push(new HotModuleReplacementPlugin())
 
 module.exports = {
