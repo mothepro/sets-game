@@ -107,11 +107,10 @@ const styles = ({spacing}: Theme) => createStyles({
 
 class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWidth, State> {
 
-    private banHandles: WeakMap<Player, number> = new WeakMap
-
-    // will be known at mount time
-    private game!: Game
+    private game!: Game // Will be known at mount time
     private readonly players: Player[] = []
+    private readonly banHandles: WeakMap<Player, number> = new WeakMap
+
     private start?: Date
     private end?: Date
 
@@ -126,7 +125,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
         hint: [],
     }
 
-    /** Defualts for single player mode */
+    /** Defaults for single player mode */
     static defaultProps = {
         players: 1,
         preventTakeAction: false,
@@ -171,27 +170,27 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
         this.state.selected.reduce((total, selected) => total + +selected, 0) == 3  // exactly 3 cards selected
 
     /**
-     * Add keyboard shortcuts.
+     * Keyboard shortcuts.
      * + Pressing `enter` tries to take a set
      */
     private keybinds = (event: KeyboardEvent) => {
-        if (event.code == 'Enter') {
-            event.preventDefault()
-            this.takeSetAttempt()
+        switch(event.code) {
+            case 'Enter':
+                event.preventDefault()
+                this.takeSetAttempt()
+                break
         }
     }
 
     /** Action to take a set from the deck for a player */
-    private takeSet = (player: index, set: CardOption) => {
-        this.setState({
-            selected: Array(this.state.card.length).fill(false),
-            hint:     Array(this.state.card.length).fill(false),
-        })
-        return this.players[player].takeSet(...this.state.card.filter((_, index) => set[index]) as CardSet)
-    }
+    private takeSet = (player: index, set: CardOption) =>
+        this.players[player].takeSet(...this.state.card.filter((_, index) => set[index]) as CardSet)
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
+        // remove selected regardless if it is successful
+        this.setState({selected: Array(this.state.card.length).fill(false)})
+
         if(!this.canTake())
             return false
 
@@ -234,8 +233,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
         this.banHandles.set(
             player,
             setInterval(
-                () => this.state.bans[index] && // premature unban
-                    this.setState({ bans: { [index]: (Date.now() - startTime) / timeout * 100 } }),
+                () => this.setState({ bans: { [index]: (Date.now() - startTime) / timeout * 100 } }),
                 Math.ceil(1000 / 60) // try to update every frame
             ) as unknown as number
         )
@@ -253,9 +251,10 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
     /** Remove cards in place, and animate new cards in order. */
     private onGrab = (removedSet: [Card, Card, Card]) =>
         this.setState({
-            scores: this.players.map(player => player.score),
-            enter: this.state.enter.map((enter, index) =>
-                        removedSet.includes(this.state.card[index]) ? 0 : enter),
+            selected: Array(this.state.card.length).fill(false),
+            hint:     Array(this.state.card.length).fill(false),
+            scores:   this.players.map(player => player.score),
+            enter:    this.state.enter.map((enter, index) => removedSet.includes(this.state.card[index]) ? 0 : enter),
         })
 
     /** Add card to state and animate it in order. */
