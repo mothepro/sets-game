@@ -1,7 +1,3 @@
-const title = 'Sets the Game',
-    logo = './Sets.png'
-
-const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 const path = require('path')
 const { HotModuleReplacementPlugin } = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -9,12 +5,17 @@ const OfflinePlugin = require('offline-plugin')
 const WebpackPwaManifest = require('webpack-pwa-manifest')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+const template = require('html-webpack-template')
+const { title, description, logo, short_name} = require('./package')
+
+const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 
 const links =[
-      'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
-      'https://fonts.googleapis.com/icon?family=Material+Icons',
-    ],
-  scripts = isProduction
+  'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+]
+
+const scripts = isProduction
     ? [ // Production CDN links
         'https://unpkg.com/react@16.6.1/umd/react.production.min.js',
         'https://unpkg.com/react-dom@16.6.1/umd/react-dom.production.min.js',
@@ -31,14 +32,12 @@ const links =[
 
 const plugins = [
     new HtmlWebpackPlugin({
-        // Required for 'html-webpack-template'
-        inject: false,
-        template: require('html-webpack-template'),
-
+        inject: false, // Required for 'html-webpack-template'
         title,
         mobile: true,
         appMountId: 'app',
         lang: 'en',
+	      template,
         scripts,
         links,
         minify: isProduction && {
@@ -56,8 +55,8 @@ const plugins = [
     new FaviconsWebpackPlugin(logo),
     new WebpackPwaManifest({
         name: title,
-        short_name: 'Sets',
-        description: 'The Card Game Sets by Mo',
+        short_name,
+        description,
         background_color: '#ffffff',
         theme_color: '#ffffff',
         crossorigin: 'anonymous',
@@ -74,10 +73,10 @@ const plugins = [
 if (isProduction)
     plugins.unshift(new CleanWebpackPlugin(['bin']))
 else
-    plugins.push(new HotModuleReplacementPlugin())
+    plugins.push(new HotModuleReplacementPlugin)
 
 module.exports = {
-    mode: 'development',
+    mode: process.env.NODE_ENV,
     entry: {
         app: [ './index.tsx' ],
     },

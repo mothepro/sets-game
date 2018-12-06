@@ -1,6 +1,10 @@
 {
   "name": "sets-game",
   "version": "0.0.2",
+  "title": "Sets the Game",
+  "short_name": "Sets",
+  "description": "'The Card Game Sets by Mo",
+  "logo": "./Sets.png",
   "scripts": {
     "start": "webpack-dev-server --mode development",
     "dev": "webpack --mode development",
