@@ -1,13 +1,19 @@
 import * as React from 'react'
 import Shape from './Shape'
 import { Card, Details } from 'sets-game-engine'
-import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme, Zoom } from '@material-ui/core'
+import { withWidth, Paper, Icon, WithStyles, withStyles, createStyles, colors, Theme, Zoom, Grid, ButtonBase } from '@material-ui/core'
 import { isWidthUp, WithWidth } from '@material-ui/core/withWidth'
 
-interface Props extends WithStyles<typeof styles>, WithWidth {
+interface Props extends NonInteractiveProps {
+    index: number
+    onClick: (index: number) => void
+}
+
+interface NonInteractiveProps extends WithStyles<typeof styles>, WithWidth {
     card: Card
-    selected: boolean
+    selected?: boolean
     hint?: boolean
+    enter?: number
 }
 
 /**
@@ -33,6 +39,10 @@ const COLORS = {
 }
 
 const styles = ({spacing}: Theme) => createStyles({
+    interactiveCard: {
+        width: '100%',
+        maxWidth: '20em',
+    },
     card: {
         width: '100%',
         maxWidth: '20em',
@@ -48,7 +58,7 @@ const styles = ({spacing}: Theme) => createStyles({
     },
 })
 
-const CardUI = ({card, selected, hint = false, width, classes}: Props) =>
+const NonInteractiveCard = ({card, selected = false, hint = false, width, classes}: NonInteractiveProps) =>
     <Paper className={classes.card} elevation={selected ? 16 : 2}>
         <Zoom in={hint} timeout={1000}>
             <Icon className={classes.hint}>star</Icon>
@@ -56,18 +66,41 @@ const CardUI = ({card, selected, hint = false, width, classes}: Props) =>
         {[...Array(1 + card.quantity)].map((_, i) =>
             <Shape
                 key={i}
-                color={COLORS[card.color]}
                 opacity={card.opacity / 2}
                 size={1 +
                     +isWidthUp('sm', width) +
                     +isWidthUp('md', width) +
                     +isWidthUp('lg', width) }
-                type={card.shape == Details.Shape.CIRCLE
-                    ? 'circle'
-                    : card.shape == Details.Shape.TRIANGLE
-                        ? 'triangle'
-                        : 'square'}
+                type={{
+                    [Details.Shape.CIRCLE]: 'circle' as 'circle',
+                    [Details.Shape.SQUARE]: 'square' as 'square',
+                    [Details.Shape.TRIANGLE]: 'triangle' as 'triangle',
+                }[card.shape]}
+                color={COLORS[card.color]}
             /> )}
     </Paper>
 
-export default withStyles(styles)(withWidth()(CardUI))
+const InteractiveCard = ({card, index, onClick, selected, hint, enter = index + 1, width, classes}: Props) => 
+    <Zoom in={!!enter} style={{transitionDelay: enter ? (enter - 1 * 250).toString() : undefined}}>
+        <Grid item container sm={4} xs={6} justify="center">
+            <ButtonBase
+                focusRipple
+                component="div"
+                onClick={event => {
+                    // If the `Enter` key was used to trigger this, ignore it since the keybind takes priority.
+                    if((event as unknown as React.KeyboardEvent).keyCode == 13)
+                        return event.preventDefault()
+                    onClick(index)
+                }}
+                className={classes.interactiveCard}>
+                <NonInteractiveCard
+                    card={card}
+                    selected={selected}
+                    hint={hint}
+                    width={width}
+                    classes={classes} />
+            </ButtonBase>
+        </Grid>
+    </Zoom>
+
+export default withStyles(styles)(withWidth()(InteractiveCard))

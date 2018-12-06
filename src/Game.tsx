@@ -40,6 +40,9 @@ export interface Props {
     // If true, will not take set when button is pressed
     preventTakeAction: boolean
 
+    // Pauses timer on focus lost
+    pauseTimeOnBlur: boolean
+
     // How long the user should be banned. (Don't provide to disable banning)
     nextTimeout?: (oldTimeout: number) => number
 
@@ -62,7 +65,7 @@ interface State {
     finished: boolean
 
     // Data for displaying cards properly
-    card: Card[]
+    cards: Card[]
     enter: number[] // order for cards to appear. 0, means to remove
     selected: CardOption
     hint: CardOption
@@ -75,10 +78,6 @@ for (let i = 0; i < 50; i++)
     }
 
 const styles = ({spacing}: Theme) => createStyles({
-    card: {
-        width: '100%',
-        maxWidth: '20em',
-    },
     score: {
         float: 'right',
     },
@@ -110,16 +109,15 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
     private game!: Game // Will be known at mount time
     private readonly players: Player[] = []
     private readonly banHandles: WeakMap<Player, number> = new WeakMap
-
-    private start?: Date
-    private end?: Date
+    private totalTime = 0
+    private lastPause = new Date
 
     readonly state: State = {
         bans: {},
         scores: (new Array(this.props.players)).fill(0),
         finished: false,
 
-        card: [],
+        cards: [],
         enter: [],
         selected: [],
         hint: [],
@@ -128,18 +126,36 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
     /** Defaults for single player mode */
     static defaultProps = {
         players: 1,
-        preventTakeAction: false,
         names: [],
+        pauseTimeOnBlur: true,
+        preventTakeAction: false,
         rng: (max: number) => Math.floor(Math.random() * max),
     }
 
+    private onFinish = () => {
+        this.pause()
+        this.setState({finished: true})
+    }
+
     componentWillUnmount = () => {
-        document.removeEventListener('keydown', this.keybinds)
+        if (typeof removeEventListener == 'function') {
+            removeEventListener('keydown', this.keybinds)
+            if (this.props.pauseTimeOnBlur) {
+                removeEventListener('focus', this.unpause)
+                removeEventListener('blur', this.pause)
+            }
+        }
         this.game.removeAllListeners()
     }
 
     componentDidMount() {
-        document.addEventListener('keydown', this.keybinds)
+        if (typeof addEventListener == 'function') {
+            addEventListener('keydown', this.keybinds)
+            if (this.props.pauseTimeOnBlur) {
+                addEventListener('focus', this.unpause)
+                addEventListener('blur', this.pause)
+            }
+        }
 
         // Make the game here in case our RNG method switches
         this.game = new Game({
@@ -154,7 +170,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
             this.game.addPlayer(player)
         }
 
-        this.game.on(Events.start, this.onStart)
+        this.game.on(Events.start, () => this.props.takeSet && this.props.takeSet(this.takeSet))
         this.game.on(Events.finish, this.onFinish)
         this.game.on(Events.playerBanned, this.onBan)
         this.game.on(Events.playerUnbanned, this.onUnban)
@@ -168,6 +184,18 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
     private canTake = () =>
         !this.state.bans[0] && // not banned
         this.state.selected.reduce((total, selected) => total + +selected, 0) == 3  // exactly 3 cards selected
+
+    /**
+     * The user switches focus away.
+     * Save the total time taken.
+     */
+    private pause = () => this.totalTime += Date.now() - this.lastPause.getTime()
+
+    /**
+     * The user returns focus.
+     * Save the current time of continue.
+     */
+    private unpause = () => this.lastPause = new Date
 
     /**
      * Keyboard shortcuts.
@@ -184,12 +212,12 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
 
     /** Action to take a set from the deck for a player */
     private takeSet = (player: index, set: CardOption) =>
-        this.players[player].takeSet(...this.state.card.filter((_, index) => set[index]) as CardSet)
+        this.players[player].takeSet(...this.state.cards.filter((_, index) => set[index]) as CardSet)
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
         // remove selected regardless if it is successful
-        this.setState({selected: Array(this.state.card.length).fill(false)})
+        this.setState({selected: Array(this.state.cards.length).fill(false)})
 
         if(!this.canTake())
             return false
@@ -207,17 +235,6 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
         if (this.props.onToggle)
             this.props.onToggle(index)
         this.setState({selected})
-    }
-
-    private onStart = () => {
-        this.start = new Date
-        if (this.props.takeSet)
-            this.props.takeSet(this.takeSet)
-    }
-
-    private onFinish = () => {
-        this.end = new Date
-        this.setState({finished: true})
     }
 
     private onBan = ({player, timeout} : {player: Player, timeout: number}) => {
@@ -251,10 +268,10 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
     /** Remove cards in place, and animate new cards in order. */
     private onGrab = (removedSet: [Card, Card, Card]) =>
         this.setState({
-            selected: Array(this.state.card.length).fill(false),
-            hint:     Array(this.state.card.length).fill(false),
+            selected: Array(this.state.cards.length).fill(false),
+            hint:     Array(this.state.cards.length).fill(false),
             scores:   this.players.map(player => player.score),
-            enter:    this.state.enter.map((enter, index) => removedSet.includes(this.state.card[index]) ? 0 : enter),
+            enter:    this.state.enter.map((enter, index) => removedSet.includes(this.state.cards[index]) ? 0 : enter),
         })
 
     /** Add card to state and animate it in order. */
@@ -264,69 +281,51 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
 
         const refillCards = () =>
             this.setState({
-                card: cards,
-                enter: cards.map((card, index) => this.state.card[index] && this.state.card[index].encoding == card.encoding
+                cards,
+                enter: cards.map((card, index) => this.state.cards[index] && this.state.cards[index].encoding == card.encoding
                     ? this.state.enter[index] // keep same if it exists
                     : count++ ),
                 selected: Array(cards.length).fill(false),
                 hint:     Array(cards.length).fill(false),
             })
 
-        if (this.state.card.length) // wait for old cards to leave
+        if (this.state.cards.length) // wait for old cards to leave
             setTimeout(refillCards, 250)
         else
             refillCards()
     }
 
     private giveHint = () => {
-        const { hint, card } = this.state
+        const { hint, cards } = this.state
         const hints = this.game.hint()
 
-        const ungivenCards = card.filter((c, index) => hints.includes(c) && !hint[index])
+        const ungivenCards = cards.filter((card, index) => hints.includes(card) && !hint[index])
 
         if (ungivenCards.length) {
             // index of a card
-            hint[ card.indexOf(ungivenCards[Math.floor(Math.random() * ungivenCards.length)]) ] = true
+            hint[ cards.indexOf(ungivenCards[Math.floor(Math.random() * ungivenCards.length)]) ] = true
             this.setState({hint})
         }
     }
 
     render = () => !this.state.finished
         ? <>
-            {this.state.card.map((card, index) =>
-                <Zoom
-                    key={card.encoding}
-                    in={!!this.state.enter[index]}
-                    style={{transitionDelay: this.state.enter[index] ? `${(this.state.enter[index] - 1)* 250}ms` : undefined}}
-                >
-                    <Grid item container sm={4} xs={6} justify="center">
-                        <ButtonBase
-                            focusRipple
-                            component="div"
-                            onClick={event => { // must be here since `index` is used
-                                // If the `Enter` key was used to trigger this, ignore it since the keybind takes priority.
-                                if((event as unknown as React.KeyboardEvent).keyCode == 13)
-                                    return event.preventDefault()
-                                this.toggleCard(index)
-                            }}
-                            className={this.props.classes.card}
-                         >
-                            <CardUI
-                                card={card}
-                                selected={this.state.selected[index]}
-                                hint={this.state.hint[index]} />
-                        </ButtonBase>
-                    </Grid>
-                </Zoom> )}
+            {this.state.cards.map((card, index) =>
+                <CardUI
+                    key={card.encoding} // should be better
+                    index={index}
+                    card={card}
+                    selected={this.state.selected[index]}
+                    hint={this.state.hint[index]}
+                    onClick={this.toggleCard} /> )}
             <Grid
                 item
                 container
                 justify="center"
                 md={6} sm={8} xs={12}
-                className={this.props.classes.gutterTop
+                className={this.props.classes.gutterTop + ' '
                     // make space room for fixed buttons
-                    + (isWidthUp('sm', this.props.width) ? '' : ' ' + this.props.classes.gutterBottom)
-                } >
+                    + (isWidthUp('sm', this.props.width) ? '' : this.props.classes.gutterBottom)} >
                 {this.props.players == 1
                     ? // Just show a sentence in solo mode
                     <Typography variant="h5">
