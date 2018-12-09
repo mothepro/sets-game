@@ -6,13 +6,13 @@ const WebpackPwaManifest = require('webpack-pwa-manifest')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 const template = require('html-webpack-template')
-const { title, description, logo, short_name} = require('./package')
+const { title, description, logo, short_name } = require('./package')
 
 const isProduction = process.env.NODE_ENV == 'production' || process.argv.includes('-p')
 
 const links =[
-  'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
-  'https://fonts.googleapis.com/icon?family=Material+Icons',
+    'https://fonts.googleapis.com/css?family=Roboto:300,400,500',
+    'https://fonts.googleapis.com/icon?family=Material+Icons',
 ]
 
 const scripts = isProduction
@@ -50,7 +50,7 @@ const plugins = [
             useShortDoctype: true,
             collapseWhitespace: true,
             collapseBooleanAttributes: true,
-        }
+        },
     }),
     new FaviconsWebpackPlugin(logo),
     new WebpackPwaManifest({
@@ -63,10 +63,10 @@ const plugins = [
         icons: [{
             src: path.resolve(logo),
             sizes: [96, 128, 192, 256, 384, 512, 1024],
-        }]
+        }],
     }),
     new OfflinePlugin({
-      extenals: [...scripts, ...links],
+        externals: [...scripts, ...links],
     }),
 ]
 
@@ -88,20 +88,20 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'bin'),
-        filename: '[name].js'
+        filename: '[name].js',
     },
     devtool: isProduction ? false : 'eval-source-map',
     resolve: {
-        extensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
+        extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     },
     module: {
         rules: [{
             test: /\.(ts|tsx)$/,
             loader: 'ts-loader',
         }, {
-            enforce: "pre",
+            enforce: 'pre',
             test: /\.js$/,
-            loader: "source-map-loader",
+            loader: 'source-map-loader',
         }],
     },
     plugins,

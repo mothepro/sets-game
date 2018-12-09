@@ -9,4 +9,5 @@ render(
     document.getElementById('app')
 )
 
-install()
+if (process.env.NODE_ENV == 'production')
+    install()

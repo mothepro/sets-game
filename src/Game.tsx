@@ -317,6 +317,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                     card={card}
                     selected={this.state.selected[index]}
                     hint={this.state.hint[index]}
+                    enter={this.state.enter[index]}
                     onClick={this.toggleCard} /> )}
             <Grid
                 item
