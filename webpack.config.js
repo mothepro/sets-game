@@ -80,7 +80,7 @@ module.exports = {
     entry: {
         app: [ './index.tsx' ],
     },
-    externals: {
+    externals: process.argv.includes('--offline') ? {} : {
         'react': 'React',
         'react-dom': 'ReactDOM',
         'p2p-lobby': 'p2p',

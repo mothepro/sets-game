@@ -88,7 +88,7 @@ const InteractiveCard = ({index, onClick, enter = index + 1, classes, ...props}:
                 component="div"
                 onClick={event => {
                     // If the `Enter` key was used to trigger this, ignore it since the keybind takes priority.
-                    if((event as unknown as React.KeyboardEvent).keyCode == 13)
+                    if((event as unknown as React.KeyboardEvent).nativeEvent.code == 'Enter')
                         return event.preventDefault()
                     onClick(index)
                 }}
