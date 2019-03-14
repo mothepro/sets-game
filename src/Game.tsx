@@ -203,10 +203,11 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
      */
     private keybinds = (event: KeyboardEvent) => {
         switch(event.code) {
-            case 'Enter':
-                event.preventDefault()
-                this.takeSetAttempt()
-                break
+        case 'Enter':
+        case 'NumpadEnter':
+            event.preventDefault()
+            this.takeSetAttempt()
+            break
         }
     }
 
