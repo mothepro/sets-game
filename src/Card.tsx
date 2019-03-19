@@ -80,26 +80,21 @@ const NonInteractiveCard = ({card, selected = false, hint = false, width, classe
             /> )}
     </Paper>
 
-const InteractiveCard = ({card, index, onClick, selected, hint, enter = index + 1, width, classes}: Props) => 
-    <Zoom in={!!enter} style={{transitionDelay: enter ? (enter - 1 * 250).toString() : undefined}}>
+const InteractiveCard = ({index, onClick, enter = index + 1, classes, ...props}: Props) =>
+    <Zoom in={!!enter} style={{transitionDelay: enter ? `${(enter - 1) * 250}ms` : undefined}}>
         <Grid item container sm={4} xs={6} justify="center">
             <ButtonBase
                 focusRipple
                 component="div"
                 onClick={event => {
                     // If the `Enter` key was used to trigger this, ignore it since the keybind takes priority.
-                    if((event as unknown as React.KeyboardEvent).keyCode == 13)
+                    if((event as unknown as React.KeyboardEvent).nativeEvent.code == 'Enter')
                         return event.preventDefault()
                     onClick(index)
                 }}
                 disabled={!!index}
                 className={classes.interactiveCard}>
-                <NonInteractiveCard
-                    card={card}
-                    selected={selected}
-                    hint={hint}
-                    width={width}
-                    classes={classes} />
+                <NonInteractiveCard {...props} classes={classes} />
             </ButtonBase>
         </Grid>
     </Zoom>

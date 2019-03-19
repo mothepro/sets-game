@@ -137,7 +137,7 @@ class Lobby extends React.PureComponent<Props, State> {
             nextTimeout: (oldTimeout: number) => oldTimeout == 0
                 ? 5 * 1000               // ban for 5 seconds by default
                 : oldTimeout + 5 * 1000, // increase ban individually
-            
+
             // Where the magic happens
             takeSet: takeSet =>
                 node.on(Events.data, ({peer, data}) => {

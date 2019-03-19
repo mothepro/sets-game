@@ -61,13 +61,15 @@ export interface Props {
 }
 
 interface State {
-    bans: { [playerIndex: number]: number } // how far the player has progressed on their ban
+    // how far the player has progressed on their ban
+    bans: { [playerIndex: number]: number }
     scores: number[]
     finished: boolean
 
     // Data for displaying cards properly
     cards: Card[]
-    enter: number[] // order for cards to appear. 0, means to remove
+    // order for cards to appear. 0, means to remove
+    enter: number[]
     selected: CardOption
     hint: CardOption
 }
@@ -115,7 +117,7 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
 
     readonly state: State = {
         bans: {},
-        scores: (new Array(this.props.players)).fill(0),
+        scores: Array(this.props.players).fill(0),
         finished: false,
 
         cards: [],
@@ -200,10 +202,11 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
      */
     private keybinds = (event: KeyboardEvent) => {
         switch(event.code) {
-            case 'Enter':
-                event.preventDefault()
-                this.takeSetAttempt()
-                break
+        case 'Enter':
+        case 'NumpadEnter':
+            event.preventDefault()
+            this.takeSetAttempt()
+            break
         }
     }
 
@@ -213,16 +216,12 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
 
     /** Main player tries to take a set */
     private takeSetAttempt = () => {
-        // remove selected regardless if it is successful
-        this.setState({selected: Array(this.state.cards.length).fill(false)})
-
-        if(!this.canTake())
-            return false
-
         if (this.props.onTakeAttempt)
             this.props.onTakeAttempt(this.state.selected)
         if (!this.props.preventTakeAction)
             this.takeSet(0, this.state.selected)
+        // remove selected regardless if it is successful
+        this.setState({selected: Array(this.state.cards.length).fill(false)})
     }
 
     /** Main player toggles a card */
@@ -365,12 +364,12 @@ class GameUI extends React.Component<Props & WithStyles<typeof styles> & WithWid
                 done_outline
             </Icon>
             <Hidden only="xs">Take Set</Hidden>
-        {this.state.bans[0] &&
-            <CircularProgress
-                variant="determinate"
-                color="secondary"
-                value={this.state.bans[0]}
-                className={this.props.classes.loading} /> }
+            {this.state.bans[0] &&
+                <CircularProgress
+                    variant="determinate"
+                    color="secondary"
+                    value={this.state.bans[0]}
+                    className={this.props.classes.loading} /> }
         </Button>
     </>
     : // TODO Show winners once game is finished.

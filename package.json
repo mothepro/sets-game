@@ -3,15 +3,17 @@
   "version": "0.0.2",
   "title": "Sets the Game",
   "short_name": "Sets",
-  "description": "'The Card Game Sets by Mo",
+  "description": "The Card Game Sets by Mo",
   "logo": "./Sets.png",
   "scripts": {
     "start": "webpack-dev-server --mode development",
     "dev": "webpack --mode development",
     "prod": "webpack -p",
     "predeploy": "npm run prod",
-    "deploy": "gh-pages -d bin"
+    "deploy": "gh-pages -d bin",
+    "prepublishOnly": "npm run prod"
   },
+  "files": ["bin", "dist"],
   "dependencies": {
     "@material-ui/core": "^3.4.0",
     "p2p-lobby": "^0.1.1",

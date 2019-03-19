@@ -1,7 +1,7 @@
 # [Sets the Game](https://mothepro.github.io/sets-game)
 
 ## Coming Soon
-+ Animation at the end screen
++ Animation at the end screen (animate.css)
 + How to play button
 + Show ban timer over score
 + Use classes over CSS styles
@@ -10,7 +10,7 @@
 + Settings before starting game
     + Hint Limit, ban timer, cards to use
 + Better accessability
-    + Colorblind friendly colors
+    + [Colorblind friendly colors](https://davidmathlogic.com/colorblind/#%23339EF4-%234CAE4F-%23F44033)
     + aria-labels
 + Google analytics & Ads
 + Offline support (manifest.json)
