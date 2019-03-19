@@ -129,6 +129,7 @@ class Lobby extends React.PureComponent<Props, State> {
 
         this.props.onStart({
             names,
+            pauseTimeOnBlur: false,
             preventTakeAction: true,
             rng:           max => Math.abs(node!.random(true)) % max,
             players:       1 + node.groupPeers.size,

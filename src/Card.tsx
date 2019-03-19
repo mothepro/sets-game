@@ -92,6 +92,7 @@ const InteractiveCard = ({card, index, onClick, selected, hint, enter = index + 
                         return event.preventDefault()
                     onClick(index)
                 }}
+                disabled={!!index}
                 className={classes.interactiveCard}>
                 <NonInteractiveCard
                     card={card}
