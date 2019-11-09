@@ -10,7 +10,6 @@
 + Settings before starting game
     + Hint Limit, ban timer, cards to use
 + Better accessability
-    + [Colorblind friendly colors](https://davidmathlogic.com/colorblind/#%23339EF4-%234CAE4F-%23F44033)
     + aria-labels
 + Google analytics & Ads
 + Offline support (manifest.json)

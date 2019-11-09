@@ -27,9 +27,9 @@ const COLORS = {
         lightness: 58,
     },
     [Details.Color.GREEN]: {
-        hue: 122,
-        saturation: 39,
-        lightness: 49,
+        hue: 45,
+        saturation: 100,
+        lightness: 50,
     },
     [Details.Color.RED]: {
         hue: 4,
